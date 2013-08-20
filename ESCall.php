@@ -127,7 +127,7 @@ class ESCall {
 					$indexNameDisplay = $indexName;
 				}
 				
-				$treeHTML .= "<li><i class=\"icon-minus-sign\" data-toggle=\"collapse\" data-target=\"#tab1_$indexName\"></i>$indexNameDisplay";
+				$treeHTML .= "<li onClick=\"changeActiveIndex('$indexName')\" style=\"cursor:pointer;\"><i class=\"icon-minus-sign\" data-toggle=\"collapse\" data-target=\"#tab1_$indexName\"></i>$indexNameDisplay";
 				$treeHTML .= "<ul id=\"tab1_$indexName\" class=\"treeAction collapse in\">";
 				
 				foreach($metadata['modules'] as $moduleName => $fields){
@@ -138,7 +138,7 @@ class ESCall {
 			}
 			$treeHTML .= "</ul>";
 			
-			return $treeHTML;
+			return "<div id=\"treeHTML\">$treeHTML</div>";
 		}else{
 			$this->logError("error","empty_array","ESMetadata is Empty, please check the settings entered.");
 			return "( empty )";
@@ -180,14 +180,19 @@ class ESCall {
 				$this->logError("info","undefined_index","ESMetadata is missing the store_size index.");
 			}
 			
-			$serverStatsHTML .= "</div>";
+			$serverStatsHTML .= "</fieldset>";
 			
 			//index stats
 			if(count($this->ESMetadata['indexes'])>0){
 				$indexStatsHTML = "";
+				$firstIndexId = "";
 				foreach($this->ESMetadata['indexes'] as $indexName => $stats){
 					
-					$indexStatsHTML .= "<fieldset id=\"index_stats_$indexName\"><legend>Index Stats</legend>";
+					if($firstIndexId==""){
+						$firstIndexId = "index_stats_$indexName";
+						$indexStatsHTML .= "<input type=hidden id=\"activeIndexId\" value=\"$firstIndexId\" />";
+					}
+					$indexStatsHTML .= "<fieldset style=\"display:none;\" id=\"index_stats_$indexName\"><legend>Index Stats</legend>";
 					$indexStatsHTML .= "<div class=\"row-fluid\"><label class=\"span6\">Index Name: </label><label class=\"span6\">$indexName</label></div>";
 					
 					if(isset($stats['index_total_docs'])===true){
@@ -208,14 +213,14 @@ class ESCall {
 						$this->logError("info","undefined_index","Stats Result is missing the index_store_size index.");
 					}
 					
-					$indexStatsHTML .= "</div><br>";
+					$indexStatsHTML .= "</fieldset>";
 					
 				}
 			}else{
 				$this->logError("error","empty_array","ESMetadata['indexes'] is Empty.");
 			}
 			
-			return "<div id=\"serverStatsHTML\">$serverStatsHTML</div><br><div id=\"indexStatsHTML\">$indexStatsHTML";
+			return "<div id=\"serverStatsHTML\">$serverStatsHTML</div><br><div id=\"indexStatsHTML\">$indexStatsHTML</div>";
 		}else{
 			$this->logError("error","empty_array","ESMetadata is Empty, please check the settings entered.");
 			return "( empty )";

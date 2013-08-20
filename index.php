@@ -60,6 +60,10 @@
 				list-style-type: none;
 				padding: 0px;
 			}
+			
+			label{
+				cursor:default;
+			}
 		</style>
 	</head>
 	<body>
@@ -143,7 +147,7 @@
 					<div class="row-fluid">
 						
 						<!-- Server Stats -->
-						<div class="span6" id="serverStats">
+						<div class="span6" id="serverStatsContent">
 							<fieldset>
     							<legend>Server Stats</legend>
     							<div class="row-fluid">
@@ -153,7 +157,7 @@
 						</div>
 						
 						<!-- Index Stats -->
-						<div class="span6" id="activeIndexStats">
+						<div class="span6" id="activeIndexStatsContent">
 							<fieldset>
     							<legend>Index Stats</legend>
     							<div class="row-fluid">
@@ -248,7 +252,7 @@
   						</fieldset>
   						
 					</div>
-					<div class="row-fluid" id="errorResults">
+					<div class="row-fluid" id="errorResultsContent">
 						<!-- Error Results -->
     				</div>
 				</div>
@@ -296,18 +300,33 @@
   				/* Put the results in a div */
   				posting.done(function( data ) {
   					
-    				var treeContent = $(data).find('#treeContent');
-    				$("#treeContent").empty().append(data);
+    				var treeContent = $(data).find('#treeHTML');
+    				$("#treeContent").empty().append(treeContent);
     				
     				var serverStatsHTML = $(data).find('#serverStatsHTML');
-    				$("#serverStats").empty().append(serverStatsHTML);
+    				$("#serverStatsContent").empty().append(serverStatsHTML);
+    				
+    				var indexStatsHTML = $(data).find('#indexStatsHTML');
+    				var activeIndexId = $(data).find('#activeIndexId').val();
+    				
+    				//put all index stats into hidden div, to be revealed when selecting an index
+    				$("#activeIndexStatsContent").empty().append(indexStatsHTML);
+    				$("#"+activeIndexId).css("display","inline");
     				
     				var errorHTML = $(data).find('#errorHTML');
-    				$("#errorResults").empty().append(errorHTML);
+    				$("#errorResultsContent").empty().append(errorHTML);
     				
     				//$( "#treeContent" ).append("test!!!!");
   				});
 			});
+			
+			function changeActiveIndex(newActiveIndex){
+				var oldActiveIndexId = $("#activeIndexId").val();
+				$("#"+oldActiveIndexId).css("display","none");
+				$("#activeIndexId").val("index_stats_"+newActiveIndex);
+				$("#index_stats_"+newActiveIndex).css("display","inline");
+			}
+			
 		</script>
 		
 	</body>
