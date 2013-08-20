@@ -7,6 +7,6 @@ $connectTest->connect();
 
 $html = $connectTest->generateTreeHTML();
 
-echo"Start:<br>$html";
+echo"<div id=\"treeContent\">$html</div>";
 
 ?>

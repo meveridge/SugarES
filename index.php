@@ -4,7 +4,6 @@
 		
 <?php
 	require_once("ESCall.php");
-	
 ?>
 
 
@@ -62,7 +61,6 @@
 				padding: 0px;
 			}
 		</style>
-		
 	</head>
 	<body>
 		<!-- nav bar -->
@@ -92,25 +90,24 @@
 				<div class="span3 well">
 					<!--Sidebar content-->
 					<!-- Connection Form -->
-					<form class="form-inline">
+					<form action='/' class="form-inline" id="serverConnection">
 						<div class="row-fluid">
 							<label class="span4" for="inputServerName">Server</label>
-  							<input class="span8" type="text" id="inputServerName" placeholder="localhost" />
+  							<input class="span8" type="text" id="inputServerName" name="inputServerName" value="localhost" />
 						</div>
 						
 						<div class="row-fluid">
 							<label class="span4" for="inputPort">Port</label>
-  							<input class="span8" type="text" id="inputPort" placeholder="9200" />
+  							<input class="span8" type="text" id="inputPort" name="inputPort" value="9200" />
 						</div>
 						
 						<div class="row-fluid">
 							<label class="span4" for="inputIndex">Index</label>
-  							<input class="span8" type="text" id="inputIndex" placeholder="(optional)" />
+  							<input class="span8" type="text" id="inputIndex" name="inputIndex" placeholder="(optional)" />
 						</div>
 						
 						<div class="row-fluid">
-							<!--<button class="btn offset4 span4" type="submit">Load</button>-->
-							<a class="btn btn-primary span6" style="align:center;" href="#"><i class="icon-refresh icon-white"></i> Load</a>
+							<a class="btn btn-primary span6" id="serverConnectionSubmit" style="align:center;"><i class="icon-refresh icon-white"></i> Load</a>
 						</div>
 					</form>
 					<!-- Actions Tab Pane -->
@@ -118,19 +115,22 @@
 						<div class="span12 well well-small">
 							<div class="tabbable" style="margin-bottom: 18px;">
 								<ul class="nav nav-tabs">
-                					<li class="active"><a href="#tab1" data-toggle="tab">Tree</a></li>
+                					<li class="active"><a href="#treeContent" data-toggle="tab">Tree</a></li>
                 					<li><a href="#tab2" data-toggle="tab">Inject</a></li>
                 					<li><a href="#tab3" data-toggle="tab">Search</a></li>
               					</ul>
 								<div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
-                					<div class="tab-pane active" id="tab1">
-                  						<ul class="treeAction"><li><i class="icon-minus-sign" data-toggle="collapse" data-target="#tab1_cd802dbad42214ba41081d088c177c4c"></i>cd802dbad42214ba4108...<ul id="tab1_cd802dbad42214ba41081d088c177c4c" class="treeAction collapse in"><li><i class="icon-plus-sign"></i>Cases</li><li><i class="icon-plus-sign"></i>Accounts</li><li><i class="icon-plus-sign"></i>Notes</li><li><i class="icon-plus-sign"></i>Meetings</li><li><i class="icon-plus-sign"></i>Documents</li><li><i class="icon-plus-sign"></i>Contacts</li><li><i class="icon-plus-sign"></i>Leads</li><li><i class="icon-plus-sign"></i>Calls</li><li><i class="icon-plus-sign"></i>Opportunities</li></ul></li><li><i class="icon-minus-sign" data-toggle="collapse" data-target="#tab1_d3f30aab421a8c6f49b61918f326b5a4"></i>d3f30aab421a8c6f49b6...<ul id="tab1_d3f30aab421a8c6f49b61918f326b5a4" class="treeAction collapse in"><li><i class="icon-plus-sign"></i>Accounts</li><li><i class="icon-plus-sign"></i>Cases</li><li><i class="icon-plus-sign"></i>Notes</li><li><i class="icon-plus-sign"></i>Meetings</li><li><i class="icon-plus-sign"></i>Contacts</li><li><i class="icon-plus-sign"></i>Leads</li><li><i class="icon-plus-sign"></i>Calls</li><li><i class="icon-plus-sign"></i>Opportunities</li></ul></li></ul>
+                					<div class="tab-pane active" id="treeContent">
+                						Enter in the ElasticSearch Server Properties and click Load.
+                  						<!--
+                  							<ul class="treeAction"><li><i class="icon-minus-sign" data-toggle="collapse" data-target="#tab1_cd802dbad42214ba41081d088c177c4c"></i>cd802dbad42214ba4108...<ul id="tab1_cd802dbad42214ba41081d088c177c4c" class="treeAction collapse in"><li><i class="icon-plus-sign"></i>Cases</li><li><i class="icon-plus-sign"></i>Accounts</li><li><i class="icon-plus-sign"></i>Notes</li><li><i class="icon-plus-sign"></i>Meetings</li><li><i class="icon-plus-sign"></i>Documents</li><li><i class="icon-plus-sign"></i>Contacts</li><li><i class="icon-plus-sign"></i>Leads</li><li><i class="icon-plus-sign"></i>Calls</li><li><i class="icon-plus-sign"></i>Opportunities</li></ul></li><li><i class="icon-minus-sign" data-toggle="collapse" data-target="#tab1_d3f30aab421a8c6f49b61918f326b5a4"></i>d3f30aab421a8c6f49b6...<ul id="tab1_d3f30aab421a8c6f49b61918f326b5a4" class="treeAction collapse in"><li><i class="icon-plus-sign"></i>Accounts</li><li><i class="icon-plus-sign"></i>Cases</li><li><i class="icon-plus-sign"></i>Notes</li><li><i class="icon-plus-sign"></i>Meetings</li><li><i class="icon-plus-sign"></i>Contacts</li><li><i class="icon-plus-sign"></i>Leads</li><li><i class="icon-plus-sign"></i>Calls</li><li><i class="icon-plus-sign"></i>Opportunities</li></ul></li></ul>
+                  						-->
                 					</div>
                 					<div class="tab-pane" id="tab2">
                   						<p>Howdy, I'm in Section 2.</p>
                 					</div>
                 					<div class="tab-pane" id="tab3">
-                  						<p>What up girl, this is Section 3.</p>
+                  						<p>What up, this is Section 3.</p>
                 					</div>
               					</div>
             				</div> <!-- /tabbable -->
@@ -143,39 +143,21 @@
 					<div class="row-fluid">
 						
 						<!-- Server Stats -->
-						<div class="span6">
+						<div class="span6" id="serverStats">
 							<fieldset>
     							<legend>Server Stats</legend>
     							<div class="row-fluid">
-    								<label class="span6">Total Docs: </label>
-    								<label class="span6">1899</label>
-    							</div>
-    							<div class="row-fluid">
-    								<label class="span6">Deleted Docs: </label>
-    								<label class="span6">101</label>
-    							</div>
-    							<div class="row-fluid">
-    								<label class="span6">Store Size: </label>
-    								<label class="span6">1 mb</label>
+    								<label class="span12">No Server Loaded.</label>
     							</div>
   							</fieldset>
 						</div>
 						
 						<!-- Index Stats -->
-						<div class="span6">
+						<div class="span6" id="activeIndexStats">
 							<fieldset>
     							<legend>Index Stats</legend>
     							<div class="row-fluid">
-    								<label class="span6">Total Docs: </label>
-    								<label class="span6">1050</label>
-    							</div>
-    							<div class="row-fluid">
-    								<label class="span6">Deleted Docs: </label>
-    								<label class="span6">0</label>
-    							</div>
-    							<div class="row-fluid">
-    								<label class="span6">Store Size: </label>
-    								<label class="span6">560.6kb</label>
+    								<label class="span12">No Active Index Selected.</label>
     							</div>
   							</fieldset>
 						</div>
@@ -264,8 +246,11 @@
 								</dl>
 							</div>
   						</fieldset>
+  						
 					</div>
-					
+					<div class="row-fluid" id="errorResults">
+						<!-- Error Results -->
+    				</div>
 				</div>
 			</div>
 		</div>
@@ -281,6 +266,49 @@
 		<script src="bootstrap/js/bootstrap-tab.js"></script>
 		<script src="bootstrap/js/bootstrap-button.js"></script>
 		<script src="bootstrap/js/bootstrap-collapse.js"></script>
+
+		<script type="text/javascript">
+			//bind the anchor tag to the form submit 
+			$(document).ready(function() {
+				$('#serverConnectionSubmit').bind('click', function(){
+	      			$('#serverConnection').submit();
+				});
+	 		});
+
+			//capture the form submit and process the ajax
+			/* attach a submit handler to the form */
+			$("#serverConnection").submit(function serverConnectionSubmit(event) {
+
+  				/* stop form from submitting normally */
+  				event.preventDefault();
+
+  				/* get some values from elements on the page: */
+  				var $form = $( this ),
+  					action = "serverConnection",
+      				inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
+      				inputPort = $form.find( 'input[name="inputPort"]' ).val(),
+      				inputIndex = $form.find( 'input[name="inputIndex"]' ).val(),
+      				url = "http://localhost/_test/SugarES/controller.php";
+
+  				/* Send the data using post */
+  				var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex } );
+
+  				/* Put the results in a div */
+  				posting.done(function( data ) {
+  					
+    				var treeContent = $(data).find('#treeContent');
+    				$("#treeContent").empty().append(data);
+    				
+    				var serverStatsHTML = $(data).find('#serverStatsHTML');
+    				$("#serverStats").empty().append(serverStatsHTML);
+    				
+    				var errorHTML = $(data).find('#errorHTML');
+    				$("#errorResults").empty().append(errorHTML);
+    				
+    				//$( "#treeContent" ).append("test!!!!");
+  				});
+			});
+		</script>
 		
 	</body>
 </html>
