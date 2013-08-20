@@ -25,6 +25,27 @@ if($_POST['action']=="serverConnection"){
 	$errorHTML = $ESServer->populateErrorHTML();
 	echo"<div id=\"errorContent\">$errorHTML</div>";
 	
+}else if($_POST['action']=="retrieveDocsByIndexAndType"){
+	require_once("ESCall.php");
+	
+	$inputServerName = $_POST['inputServerName'];
+	$inputPort = $_POST['inputPort'];
+	$inputIndex = $_POST['inputIndex'];
+	$inputType = $_POST['inputType'];
+	
+	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndex);
+	$docTreeHTML = $ESServer->getDocsByIndexAndType($inputType);
+	
+	echo"<div id=\"docTreeContent\">$docTreeHTML</div>";
+	
+	//populate any error message we have generated 
+	//during the process of making calls
+	$errorHTML = $ESServer->populateErrorHTML();
+	echo"<div id=\"errorContent\">$errorHTML</div>";
+	
+	
+	
+	
 }else{
 	echo"No Action Defined.";
 }

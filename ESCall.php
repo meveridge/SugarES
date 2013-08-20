@@ -33,12 +33,37 @@ class ESCall {
 		//load server data (stats)
 		$this->loadServerStats();
 		
-		//loadServerData();
+	}
+	
+	public function getDocsByIndexAndType($inputType){
 		
-		//load index stats
+		$returnedCount = 50;
+		
+		$this->queryString = $this->host . ":" . $this->port;
+		$this->queryString .= "/" . $this->indexName;
+		$this->queryString .= "/" . $inputType;
+		$this->queryString .= "/_search?size=$returnedCount";
+		
+		$docResults = $this->executeQuery();
+		
+		$totalCount = $docResults['hits']['total'];
 		
 		
-
+		if($totalCount < $returnedCount) $returnedCount = $totalCount;
+		$this->logError("success","record_count","Returned $returnedCount of $totalCount records.");
+		
+		$docTreeHTML = "<ul id=\"{$this->indexName}_{$inputType}_docs\" class=\"treeAction\">";
+		foreach($docResults['hits']['hits'] as $key => $value){
+			$docId = $value['_id'];
+			if(strlen($docId)>15){
+				$docIdDisplay = substr($docId,0,15) . "...";
+			}else{
+				$docIdDisplay = $docId;
+			}
+			$docTreeHTML .= "<li id=\"tree_{$docId}\" class=\"treeAction\">$docId</li>";
+		}
+		$docTreeHTML .= "</ul>";
+		return "<div id=\"docTreeHTML\">$docTreeHTML</div>";
 	}
 	
 	/* loadESMetadata()
@@ -67,10 +92,10 @@ class ESCall {
 				"version" => "0.".$value['settings']['index.version.created'],
 			);
 			
+			ksort($value['mappings']);
 			foreach($value['mappings'] as $subkey => $subvalue){
 				$this->ESMetadata['indexes'][$key]['modules'][$subkey]['fields'] = $subvalue['properties'];
 			}
-			
 		}
 	}
 	
@@ -95,15 +120,18 @@ class ESCall {
 			$this->ESMetadata['store_size'] = $serverStats['_all']['total']['store']['size'];
 			
 			//populate index data
-			$indices = $serverStats['_all']['indices'];
-			
-			foreach($indices as $indexName => $indexStats){
-			
-				$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
-				$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+			if(isset($serverStats['_all']['indices']) && count($serverStats['_all']['indices'])>0){
+				$indices = $serverStats['_all']['indices'];
+				foreach($indices as $indexName => $indexStats){
 				
-				$this->ESMetadata['indexes'][$indexName]['index_store_size'] = $indexStats['total']['store']['size'];
-				
+					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
+					$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+					
+					$this->ESMetadata['indexes'][$indexName]['index_store_size'] = $indexStats['total']['store']['size'];
+					
+				}
+			}else{
+				$this->logError("warning","empty_array","Function loadServerStats() returned an empty indices array.");
 			}
 		}else{
 			$this->logError("warning","empty_array","Function loadServerStats() returned an empty array.");
@@ -127,11 +155,14 @@ class ESCall {
 					$indexNameDisplay = $indexName;
 				}
 				
-				$treeHTML .= "<li onClick=\"changeActiveIndex('$indexName')\" style=\"cursor:pointer;\"><i class=\"icon-minus-sign\" data-toggle=\"collapse\" data-target=\"#tab1_$indexName\"></i>$indexNameDisplay";
+				$treeHTML .= "<li onClick=\"changeActiveIndex('$indexName')\" style=\"cursor:pointer;\">";
+				$treeHTML .= "<i class=\"icon-minus-sign\" data-toggle=\"collapse\" data-target=\"#tab1_$indexName\" id=\"{$indexName}_icon\" onClick=\"changeTreeIcon('{$indexName}_icon');\"></i>$indexNameDisplay";
 				$treeHTML .= "<ul id=\"tab1_$indexName\" class=\"treeAction collapse in\">";
 				
 				foreach($metadata['modules'] as $moduleName => $fields){
-					$treeHTML .= "<li><i class=\"icon-plus-sign\"></i>$moduleName</li>";
+					$treeHTML .= "<li id=\"{$indexName}_{$moduleName}\">";
+					$treeHTML .= "<i id=\"{$indexName}_{$moduleName}_icon\" class=\"icon-plus-sign\" data-toggle=\"collapse\" data-target=\"#{$indexName}_{$moduleName}_docs\" onClick=\"retrieveDocsByIndexAndType('{$indexName}','{$moduleName}');\"></i>";
+					$treeHTML .= "$moduleName<div id=\"{$indexName}_{$moduleName}_child\"></div></li>";
 				}
 				
 				$treeHTML .= "</ul></li>";
@@ -213,6 +244,17 @@ class ESCall {
 						$this->logError("info","undefined_index","Stats Result is missing the index_store_size index.");
 					}
 					
+					if(isset($stats['state'])===true){
+						$indexStatsHTML .= "<div class=\"row-fluid\"><label class=\"span6\">Index State: </label><label class=\"span6\">{$stats['state']}</label></div>";
+					}else{
+						$this->logError("info","undefined_index","Stats Result is missing the state index.");
+					}
+					if(isset($stats['version'])===true){
+						$indexStatsHTML .= "<div class=\"row-fluid\"><label class=\"span6\">Index Version: </label><label class=\"span6\">{$stats['version']}</label></div>";
+					}else{
+						$this->logError("info","undefined_index","Stats Result is missing the version index.");
+					}
+					
 					$indexStatsHTML .= "</fieldset>";
 					
 				}
@@ -241,9 +283,10 @@ class ESCall {
 	public function populateErrorHTML(){
 		
 		if(count($this->errorArray)>0){
-			$errorHTML = "<fieldset><legend>Errors</legend>";	
+			$errorHTML = "<fieldset><legend>Log</legend>";	
 			foreach($this->errorArray as $errorId => $errorContent){
-				$errorHTML .= "<div class=\"row-fluid text-{$errorContent['severity']}\"><label class=\"span2\">{$errorContent['type']}</label>";
+				$errorHTML .= "<div class=\"row-fluid text-{$errorContent['severity']}\">";
+				$errorHTML .= "<label class=\"span2\">{$errorContent['type']}</label>";
 				$errorHTML .= "<div class=\"span10\">{$errorContent['description']}</div></div>";
 			}
 			$errorHTML .= "</fieldset>";
@@ -255,6 +298,7 @@ class ESCall {
 		//echo"execute executeQuery:$method:url={".$this->queryString."}<br>";
 		// create a new cURL resource
 		$ch = curl_init();
+		$this->logError("info","curl_url",$this->queryString);
 		
 		// set URL and other appropriate options
 		curl_setopt($ch, CURLOPT_URL, $this->queryString);
@@ -277,7 +321,7 @@ class ESCall {
 		
 		$curlError = curl_error($ch);
 		if(!empty($curlError)){
-			$this->logError("error","curl_error",$curlError);	
+			$this->logError("error","curl_error",$curlError);
 		}
 		
 		//if($results){echo"Results = TRue";}
@@ -286,8 +330,14 @@ class ESCall {
 		curl_close($ch);
 		
 		$result_array = json_decode($results,TRUE);
+		if(count($result_array)>0){
+			if(isset($result_array['exists']) && $result_array['exists']==false){
+				$this->logError("error","es_error","Elasticsearch did not return a proper dataset.");
+			}
+		}else{
+			$this->logError("error","es_error","Elasticsearch did not return a proper dataset.");
+		}
 		
-		//if(count($result_array)>0){echo"Results count is good: ".count($result_array);}
 		return $result_array;	
 	}
 	

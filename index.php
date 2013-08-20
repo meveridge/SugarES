@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		
-<?php
-	require_once("ESCall.php");
-?>
-
-
 		<meta charset="utf-8">
 		<title>
 			SugarES
@@ -112,6 +106,7 @@
 						
 						<div class="row-fluid">
 							<a class="btn btn-primary span6" id="serverConnectionSubmit" style="align:center;"><i class="icon-refresh icon-white"></i> Load</a>
+							<input type="submit" style="border: none;width: 0;height: 0;line-height: 0;padding:0;margin: 0;" />
 						</div>
 					</form>
 					<!-- Actions Tab Pane -->
@@ -126,15 +121,12 @@
 								<div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
                 					<div class="tab-pane active" id="treeContent">
                 						Enter in the ElasticSearch Server Properties and click Load.
-                  						<!--
-                  							<ul class="treeAction"><li><i class="icon-minus-sign" data-toggle="collapse" data-target="#tab1_cd802dbad42214ba41081d088c177c4c"></i>cd802dbad42214ba4108...<ul id="tab1_cd802dbad42214ba41081d088c177c4c" class="treeAction collapse in"><li><i class="icon-plus-sign"></i>Cases</li><li><i class="icon-plus-sign"></i>Accounts</li><li><i class="icon-plus-sign"></i>Notes</li><li><i class="icon-plus-sign"></i>Meetings</li><li><i class="icon-plus-sign"></i>Documents</li><li><i class="icon-plus-sign"></i>Contacts</li><li><i class="icon-plus-sign"></i>Leads</li><li><i class="icon-plus-sign"></i>Calls</li><li><i class="icon-plus-sign"></i>Opportunities</li></ul></li><li><i class="icon-minus-sign" data-toggle="collapse" data-target="#tab1_d3f30aab421a8c6f49b61918f326b5a4"></i>d3f30aab421a8c6f49b6...<ul id="tab1_d3f30aab421a8c6f49b61918f326b5a4" class="treeAction collapse in"><li><i class="icon-plus-sign"></i>Accounts</li><li><i class="icon-plus-sign"></i>Cases</li><li><i class="icon-plus-sign"></i>Notes</li><li><i class="icon-plus-sign"></i>Meetings</li><li><i class="icon-plus-sign"></i>Contacts</li><li><i class="icon-plus-sign"></i>Leads</li><li><i class="icon-plus-sign"></i>Calls</li><li><i class="icon-plus-sign"></i>Opportunities</li></ul></li></ul>
-                  						-->
                 					</div>
                 					<div class="tab-pane" id="tab2">
-                  						<p>Howdy, I'm in Section 2.</p>
+                  						<p>Inject section still to be built...</p>
                 					</div>
                 					<div class="tab-pane" id="tab3">
-                  						<p>What up, this is Section 3.</p>
+                  						<p>Search section still to be built...</p>
                 					</div>
               					</div>
             				</div> <!-- /tabbable -->
@@ -144,7 +136,7 @@
 				<div class="span8">
 					<!--Body content-->
 					
-					<div class="row-fluid">
+					<div class="row-fluid hidden-phone">
 						
 						<!-- Server Stats -->
 						<div class="span6" id="serverStatsContent">
@@ -157,7 +149,7 @@
 						</div>
 						
 						<!-- Index Stats -->
-						<div class="span6" id="activeIndexStatsContent">
+						<div class="span6 hidden-phone" id="activeIndexStatsContent">
 							<fieldset>
     							<legend>Index Stats</legend>
     							<div class="row-fluid">
@@ -172,28 +164,6 @@
 						
 						<fieldset>
     						<legend>Record Results</legend>
-    						<!-- rows and labels
-							<div class="row-fluid">
-								<label class="span6">Index Name: </label>
-								<label class="span6">d3f30aab421a8c6f49b61918f326b5a4</label>
-							</div>
-							<div class="row-fluid">
-								<label class="span6">Type: </label>
-								<label class="span6">Accounts</label>
-							</div>
-							<div class="row-fluid">
-								<label class="span6">Id: </label>
-								<label class="span6">a3867037-aa48-4b7d-4170-520b85aad5b9</label>
-							</div>
-							<div class="row-fluid">
-								<label class="span6">Score: </label>
-								<label class="span6">1.0</label>
-							</div>
-							<br />
-							<div class="row-fluid">
-								<label class="span6"><strong>Data: </strong></label>
-							</div>
-							<!-- end rows and labels-->
 							
 							<!-- Tables -->
 								<table class="table table-striped table-condensed table-bordered">
@@ -231,6 +201,7 @@
 									</tr>
 								</table>
 							<!-- End Tables -->
+							
 							<div class="row-fluid">
 								<dl class="dl-horizontal">
 									<dt>name:</dt>
@@ -325,6 +296,52 @@
 				$("#"+oldActiveIndexId).css("display","none");
 				$("#activeIndexId").val("index_stats_"+newActiveIndex);
 				$("#index_stats_"+newActiveIndex).css("display","inline");
+			}
+			
+			function changeTreeIcon(iconId){
+				var newClass = ""; 
+				if($("#"+iconId).hasClass("icon-plus-sign")){
+					$("#"+iconId).removeClass("icon-plus-sign");
+					$("#"+iconId).addClass("icon-minus-sign",true);
+					newClass = "icon-minus-sign";
+				}else{
+					$("#"+iconId).addClass("icon-plus-sign",true);
+					$("#"+iconId).removeClass("icon-minus-sign",true);
+					newClass = "icon-plus-sign";
+				}
+				return newClass;
+			}
+			
+			function retrieveDocsByIndexAndType(inputIndex,inputType){
+				
+				var targetId = inputIndex + "_" + inputType + "_child";
+				var iconId = inputIndex + "_" + inputType + "_icon";
+				
+				var newClass = changeTreeIcon(iconId);
+				
+				if(newClass == "icon-minus-sign"){
+					//only run ajax if icon is minus sign, meaning the section is open
+					//get some values from elements on the page:
+	  				var $form = $("#serverConnection"),
+	  					action = "retrieveDocsByIndexAndType",
+	      				inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
+	      				inputPort = $form.find( 'input[name="inputPort"]' ).val(),
+	      				url = "http://localhost/_test/SugarES/controller.php";
+	
+	  				//Send the data using post
+	  				var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex, inputType: inputType } );
+	
+	  				//Put the results in a div
+	  				posting.done(function(data) {
+	
+	  					var docTreeHTML = $(data).find('#docTreeHTML');
+	    				$("#"+targetId).empty().append(docTreeHTML);
+	    				
+	    				var errorHTML = $(data).find('#errorHTML');
+	    				$("#errorResultsContent").empty().append(errorHTML);
+	  				});
+  				
+  				}
 			}
 			
 		</script>
