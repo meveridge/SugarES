@@ -62,7 +62,9 @@
 	</head>
 	<body>
 		
-		<input type="hidden" id="activeDocRecord" />
+		<input type="hidden" id="activeDocRecordIndex" />
+		<input type="hidden" id="activeDocRecordType" />
+		<input type="hidden" id="activeDocRecordId" />
 		
 		<!-- nav bar -->
 		<div class="navbar navbar-inverse navbar-fixed-top">
@@ -94,22 +96,27 @@
 					<form action='/' class="form-inline" id="serverConnection">
 						<div class="row-fluid">
 							<label class="span4" for="inputServerName">Server</label>
-  							<input class="span8" type="text" id="inputServerName" name="inputServerName" value="localhost" />
+  							<input class="span8" type="text" id="inputServerName" name="inputServerName" value="localhost" tabindex="1" />
 						</div>
 						
 						<div class="row-fluid">
 							<label class="span4" for="inputPort">Port</label>
-  							<input class="span8" type="text" id="inputPort" name="inputPort" value="9200" />
+  							<input class="span8" type="text" id="inputPort" name="inputPort" value="9200" tabindex="2" />
 						</div>
-						
+						<!--
 						<div class="row-fluid">
 							<label class="span4" for="inputIndex">Index</label>
   							<input class="span8" type="text" id="inputIndex" name="inputIndex" placeholder="(optional)" />
 						</div>
+						-->
+						<input type="hidden" id="inputIndex" name="inputIndex" />
 						
 						<div class="row-fluid">
-							<a class="btn btn-primary span6" id="serverConnectionSubmit" style="align:center;"><i class="icon-refresh icon-white"></i> Load</a>
-							<input type="submit" style="border: none;width: 0;height: 0;line-height: 0;padding:0;margin: 0;" />
+							<div class="form-actions">
+								<button type="submit" class="btn btn-primary pull-right" tabindex="3"><i class="icon-refresh icon-white"></i> Load</button>
+							<!-- <a class="btn btn-primary span6" id="serverConnectionSubmit" style="align:center;" tabindex="3"><i class="icon-refresh icon-white"></i> Load</a> -->
+							<!-- <input type="submit" style="border: none;width: 0;height: 0;line-height: 0;padding:0;margin: 0;" /> -->
+							</div>
 						</div>
 					</form>
 					<!-- Actions Tab Pane -->
@@ -185,17 +192,10 @@
 		<script src="bootstrap/js/bootstrap-collapse.js"></script>
 
 		<script type="text/javascript">
-			//bind the anchor tag to the form submit 
-			$(document).ready(function() {
-				$('#serverConnectionSubmit').bind('click', function(){
-	      			$('#serverConnection').submit();
-				});
-	 		});
-
 			//capture the form submit and process the ajax
 			/* attach a submit handler to the form */
 			$("#serverConnection").submit(function serverConnectionSubmit(event) {
-
+				
   				/* stop form from submitting normally */
   				event.preventDefault();
 
@@ -240,7 +240,12 @@
 				$("#index_stats_"+newActiveIndex).css("display","inline");
 			}
 			
-			function changeTreeIcon(iconId){
+			function changeTreeIcon(inputIndex,inputType){
+				if(inputType==""){
+					var iconId = inputIndex + "_icon";
+				}else{
+					var iconId = inputIndex + "_" + inputType + "_icon";
+				}
 				var newClass = ""; 
 				if($("#"+iconId).hasClass("icon-plus-sign")){
 					$("#"+iconId).removeClass("icon-plus-sign");
@@ -250,6 +255,16 @@
 					$("#"+iconId).addClass("icon-plus-sign",true);
 					$("#"+iconId).removeClass("icon-minus-sign",true);
 					newClass = "icon-plus-sign";
+					
+					if(inputType!=""){
+						var activeDocRecordIndex = $("#activeDocRecordIndex").val();
+	  					var activeDocRecordType = $("#activeDocRecordType").val();
+	  					
+	  					if(activeDocRecordIndex==inputIndex && activeDocRecordType == inputType){
+	  						$("#mainContent").empty();
+	  					}
+					}
+					
 				}
 				return newClass;
 			}
@@ -259,7 +274,7 @@
 				var targetId = inputIndex + "_" + inputType + "_child";
 				var iconId = inputIndex + "_" + inputType + "_icon";
 				
-				var newClass = changeTreeIcon(iconId);
+				var newClass = changeTreeIcon(inputIndex,inputType);
 				
 				if(newClass == "icon-minus-sign"){
 					//only run ajax if icon is minus sign, meaning the section is open
@@ -283,6 +298,16 @@
 	    				$("#errorResultsContent").empty().append(errorHTML);
 	  				});
   				
+  				}else{
+  					//collapse tree, clear the results
+  					//but only if we collapse the active record section
+  					
+  					var activeDocRecordIndex = $("#activeDocRecordIndex").val();
+  					var activeDocRecordType = $("#activeDocRecordType").val();
+  					
+  					if(activeDocRecordIndex==inputIndex && activeDocRecordType == inputType){
+  						$("#mainContent").empty();
+  					}
   				}
 			}
 			
@@ -295,14 +320,17 @@
 	      			url = "http://localhost/_test/SugarES/controller.php";
 				
 				//tree record highlighting
-				if(activeDocRecord!=""){
-					$("#tree_"+activeDocRecord).removeClass("muted");
-					$("#tree_"+activeDocRecord+"_icon").removeClass("icon-arrow-right");
+				if(activeDocRecordId!=""){
+					$("#"+$("#activeDocRecordIndex").val()+"_"+$("#activeDocRecordType").val()+"_tree_"+$("#activeDocRecordId").val()).removeClass("muted");
+					$("#"+$("#activeDocRecordIndex").val()+"_"+$("#activeDocRecordType").val()+"_tree_"+$("#activeDocRecordId").val()+"_icon").removeClass("icon-arrow-right");
 					//$("#tree_"+activeDocRecord+"_icon").removeClass("icon-white");
 				}
-				$("#activeDocRecord").val(inputId);
-				$("#tree_"+inputId).addClass("muted");
-				$("#tree_"+inputId+"_icon").addClass("icon-arrow-right");
+				$("#activeDocRecordIndex").val(inputIndex);
+				$("#activeDocRecordType").val(inputType);
+				$("#activeDocRecordId").val(inputId);
+				
+				$("#"+inputIndex+"_"+inputType+"_tree_"+inputId).addClass("muted");
+				$("#"+inputIndex+"_"+inputType+"_tree_"+inputId+"_icon").addClass("icon-arrow-right");
 				//$("#tree_"+inputId+"_icon").addClass("icon-white");
 				
 				

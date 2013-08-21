@@ -60,7 +60,7 @@ class ESCall {
 			}else{
 				$docIdDisplay = $docId;
 			}
-			$docTreeHTML .= "<li id=\"tree_{$docId}\" class=\"treeAction\" onClick=\"retrieveDocById('{$this->indexName}','{$inputType}','{$docId}');\">$docIdDisplay<i id=\"tree_{$docId}_icon\"></i></li>";
+			$docTreeHTML .= "<li id=\"{$this->indexName}_{$inputType}_tree_{$docId}\" class=\"treeAction\" onClick=\"retrieveDocById('{$this->indexName}','{$inputType}','{$docId}');\">$docIdDisplay<i id=\"{$this->indexName}_{$inputType}_tree_{$docId}_icon\" class=\"pull-right\"></i></li>";
 		}
 		$docTreeHTML .= "</ul>";
 		return "<div id=\"docTreeHTML\">$docTreeHTML</div>";
@@ -138,6 +138,7 @@ class ESCall {
 	public function loadServerStats(){
 		
 		$this->queryString = $this->host . ":" . $this->port;
+		if($this->indexName != "") $this->queryString .= "/" . $this->indexName;
 		$this->queryString .= "/_stats?indexing=false&get=false&search=false";
 		
 		$serverStats = $this->executeQuery();
@@ -153,6 +154,16 @@ class ESCall {
 			//populate index data
 			if(isset($serverStats['_all']['indices']) && count($serverStats['_all']['indices'])>0){
 				$indices = $serverStats['_all']['indices'];
+				foreach($indices as $indexName => $indexStats){
+				
+					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
+					$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+					
+					$this->ESMetadata['indexes'][$indexName]['index_store_size'] = $indexStats['total']['store']['size'];
+					
+				}
+			}elseif(isset($serverStats['indices']) && count($serverStats['indices'])>0){
+				$indices = $serverStats['indices'];
 				foreach($indices as $indexName => $indexStats){
 				
 					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
@@ -187,7 +198,7 @@ class ESCall {
 				}
 				
 				$treeHTML .= "<li onClick=\"changeActiveIndex('$indexName')\" style=\"cursor:pointer;\">";
-				$treeHTML .= "<i class=\"icon-minus-sign\" data-toggle=\"collapse\" data-target=\"#tab1_$indexName\" id=\"{$indexName}_icon\" onClick=\"changeTreeIcon('{$indexName}_icon');\"></i>$indexNameDisplay";
+				$treeHTML .= "<i class=\"icon-minus-sign\" data-toggle=\"collapse\" data-target=\"#tab1_$indexName\" id=\"{$indexName}_icon\" onClick=\"changeTreeIcon('{$indexName}','');\"></i>$indexNameDisplay";
 				$treeHTML .= "<ul id=\"tab1_$indexName\" class=\"treeAction collapse in\">";
 				
 				foreach($metadata['modules'] as $moduleName => $fields){
