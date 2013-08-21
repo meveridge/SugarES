@@ -5,6 +5,7 @@
 		<title>
 			SugarES
 		</title>
+		<link rel="icon" type="image/png" href="sugar_icon.ico">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 		<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -104,17 +105,20 @@
 							<label class="span4" for="inputPort">Port</label>
   							<input class="span8" type="text" id="inputPort" name="inputPort" value="9200" tabindex="2" />
 						</div>
-						<!--
+						
 						<div class="row-fluid">
 							<label class="span4" for="inputIndex">Index</label>
   							<input class="span8" type="text" id="inputIndex" name="inputIndex" placeholder="(optional)" />
 						</div>
-						-->
-						<input type="hidden" id="inputIndex" name="inputIndex" />
+						
+						<!--<input type="hidden" id="inputIndex" name="inputIndex" />-->
 						
 						<div class="row-fluid">
 							<div class="form-actions">
-								<button type="submit" class="btn btn-primary pull-right" tabindex="3"><i class="icon-refresh icon-white"></i> Load</button>
+								<button id="serverConnectionSubmit" type="submit" class="btn btn-primary pull-right" tabindex="3">
+									<i class="icon-refresh icon-white"></i>
+									Load
+								</button>
 							<!-- <a class="btn btn-primary span6" id="serverConnectionSubmit" style="align:center;" tabindex="3"><i class="icon-refresh icon-white"></i> Load</a> -->
 							<!-- <input type="submit" style="border: none;width: 0;height: 0;line-height: 0;padding:0;margin: 0;" /> -->
 							</div>
@@ -224,6 +228,14 @@
   			</div>
 		</div>
 		<!-- End Contact Modal -->
+		
+		<!-- Loading Modal -->
+		<div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+  			<div class="modal-body">
+  				<p><img src="spinner.gif" />Loading...</p>
+  			</div>
+		</div>
+		<!-- Loading Modal -->
 
 		<script src="bootstrap/js/jquery-2.0.3.min.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
@@ -233,9 +245,13 @@
 		<script src="bootstrap/js/bootstrap-collapse.js"></script>
 
 		<script type="text/javascript">
+			//$('#loadingModal').hide();
+			
 			//capture the form submit and process the ajax
 			/* attach a submit handler to the form */
 			$("#serverConnection").submit(function serverConnectionSubmit(event) {
+				
+				$('#loadingModal').modal('show')
 				
   				/* stop form from submitting normally */
   				event.preventDefault();
@@ -270,7 +286,8 @@
     				var errorHTML = $(data).find('#errorHTML');
     				$("#errorResultsContent").empty().append(errorHTML);
     				
-    				//$( "#treeContent" ).append("test!!!!");
+    				//$('#loadingModal').hide();
+    				$('#loadingModal').modal('hide')
   				});
 			});
 			

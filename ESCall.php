@@ -22,6 +22,7 @@ class ESCall {
 		if($hostOverride != "") $this->host = $hostOverride;
 		if($portOverride != "") $this->port = $portOverride;
 		if($indexOverride != "") $this->indexName = $indexOverride;
+		$this->logError("success","information","Connecting to: {$hostOverride}:{$portOverride}/{$indexOverride}");
 		
 	}
 	
@@ -114,10 +115,12 @@ class ESCall {
 		
 		$this->ESMetadata['cluster_name'] = $ESMetadata['cluster_name'];
 		
+		$indexOverride = $this->indexName;
+		
 		$indices = $ESMetadata['metadata']['indices'];
 		
 		foreach($indices as $key => $value){
-		
+			if($indexOverride != "" && $indexOverride != $key) continue;
 			$this->ESMetadata['indexes'][$key] = array(
 				"state" => $value['state'],
 				"version" => "0.".$value['settings']['index.version.created'],
@@ -138,7 +141,8 @@ class ESCall {
 	public function loadServerStats(){
 		
 		$this->queryString = $this->host . ":" . $this->port;
-		if($this->indexName != "") $this->queryString .= "/" . $this->indexName;
+		//if($this->indexName != "") $this->queryString .= "/" . $this->indexName;
+		$indexOverride = $this->indexName;
 		$this->queryString .= "/_stats?indexing=false&get=false&search=false";
 		
 		$serverStats = $this->executeQuery();
@@ -155,7 +159,8 @@ class ESCall {
 			if(isset($serverStats['_all']['indices']) && count($serverStats['_all']['indices'])>0){
 				$indices = $serverStats['_all']['indices'];
 				foreach($indices as $indexName => $indexStats){
-				
+					if($indexOverride != "" && $indexOverride != $indexName) continue;
+					
 					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
 					$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
 					
@@ -165,7 +170,8 @@ class ESCall {
 			}elseif(isset($serverStats['indices']) && count($serverStats['indices'])>0){
 				$indices = $serverStats['indices'];
 				foreach($indices as $indexName => $indexStats){
-				
+					if($indexOverride != "" && $indexOverride != $indexName) continue;
+					
 					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
 					$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
 					
