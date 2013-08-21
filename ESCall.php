@@ -60,10 +60,41 @@ class ESCall {
 			}else{
 				$docIdDisplay = $docId;
 			}
-			$docTreeHTML .= "<li id=\"tree_{$docId}\" class=\"treeAction\">$docId</li>";
+			$docTreeHTML .= "<li id=\"tree_{$docId}\" class=\"treeAction\" onClick=\"retrieveDocById('{$this->indexName}','{$inputType}','{$docId}');\">$docIdDisplay<i id=\"tree_{$docId}_icon\"></i></li>";
 		}
 		$docTreeHTML .= "</ul>";
 		return "<div id=\"docTreeHTML\">$docTreeHTML</div>";
+	}
+	
+	public function getDocById($inputType,$inputId){
+		
+		$this->queryString = $this->host . ":" . $this->port;
+		$this->queryString .= "/" . $this->indexName;
+		$this->queryString .= "/" . $inputType;
+		$this->queryString .= "/" . $inputId;
+		
+		$docResults = $this->executeQuery();
+		
+		$_index = $docResults['_index'];
+		$_type = $docResults['_type'];
+		$_id = $docResults['_id'];
+		$_version = $docResults['_version'];
+		
+		$docHTML = "<fieldset><legend>Record Results</legend>";
+		$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
+		$docHTML .= "<tr><td>Index Name</td><td>$_index</td></tr>";
+		$docHTML .= "<tr><td>Type</td><td>$_type</td></tr>";
+		$docHTML .= "<tr><td>Id</td><td>$_id</td></tr>";
+		$docHTML .= "<tr><td>Doc Version</td><td>$_version</td></tr>";
+		$docHTML .= "</table><div class=\"row-fluid\"><dl class=\"dl-horizontal\">";
+		
+		foreach($docResults['_source'] as $fieldName => $fieldValue){
+			$docHTML .= "<dt>$fieldName:</dt><dd>$fieldValue</dd>";
+		}
+		
+		$docHTML .= "</dl></div></fieldset>";
+
+		return "<div id=\"docHTML\">$docHTML</div>";
 	}
 	
 	/* loadESMetadata()

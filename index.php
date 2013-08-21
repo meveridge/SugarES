@@ -61,6 +61,9 @@
 		</style>
 	</head>
 	<body>
+		
+		<input type="hidden" id="activeDocRecord" />
+		
 		<!-- nav bar -->
 		<div class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
@@ -159,69 +162,8 @@
 						</div>
 					</div>
 					
-					<div class="row-fluid">
-						<!-- Record Results -->
-						
-						<fieldset>
-    						<legend>Record Results</legend>
-							
-							<!-- Tables -->
-								<table class="table table-striped table-condensed table-bordered">
-									<tr>
-										<td>
-											Index Name
-										</td>
-										<td>
-											d3f30aab421a8c6f49b61918f326b5a4
-										</td>
-									</tr>
-									<tr>
-										<td>
-											Type
-										</td>
-										<td>
-											Accounts
-										</td>
-									</tr>
-									<tr>
-										<td>
-											Id
-										</td>
-										<td>
-											a3867037-aa48-4b7d-4170-520b85aad5b9
-										</td>
-									</tr>
-									<tr>
-										<td>
-											Score
-										</td>
-										<td>
-											1.0
-										</td>
-									</tr>
-								</table>
-							<!-- End Tables -->
-							
-							<div class="row-fluid">
-								<dl class="dl-horizontal">
-									<dt>name:</dt>
-									<dd>Waverly Trading House</dd>
-									<dt>phone_office:</dt>
-									<dd>(517) 856-1556</dd>
-									<dt>email1:</dt>
-									<dd>the.the.info@example.co.jp</dd>
-									<dt>module:</dt>
-									<dd>Accounts</dd>
-									<dt>team_set_id:</dt>
-									<dd>5c8817c8099600398510520b851be2d3</dd>
-									<dt>user_favorites:</dt>
-									<dd>[]</dd>
-									<dt>doc_owner:</dt>
-									<dd>seed_jim_id</dd>
-								</dl>
-							</div>
-  						</fieldset>
-  						
+					<div class="row-fluid" id="mainContent">
+						<!-- Main Content -->
 					</div>
 					<div class="row-fluid" id="errorResultsContent">
 						<!-- Error Results -->
@@ -344,6 +286,38 @@
   				}
 			}
 			
+			function retrieveDocById(inputIndex,inputType,inputId){
+				var $form = $("#serverConnection"),
+					activeDocRecord = $("#activeDocRecord").val(),
+	  				action = "retrieveDocById",
+	      			inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
+	      			inputPort = $form.find( 'input[name="inputPort"]' ).val(),
+	      			url = "http://localhost/_test/SugarES/controller.php";
+				
+				//tree record highlighting
+				if(activeDocRecord!=""){
+					$("#tree_"+activeDocRecord).removeClass("muted");
+					$("#tree_"+activeDocRecord+"_icon").removeClass("icon-arrow-right");
+					//$("#tree_"+activeDocRecord+"_icon").removeClass("icon-white");
+				}
+				$("#activeDocRecord").val(inputId);
+				$("#tree_"+inputId).addClass("muted");
+				$("#tree_"+inputId+"_icon").addClass("icon-arrow-right");
+				//$("#tree_"+inputId+"_icon").addClass("icon-white");
+				
+				
+	  			//Send the data using post
+	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex, inputType: inputType, inputId: inputId } );
+	
+	  			//Put the results in a div
+	  			posting.done(function(data) {
+	
+	  				var docHTML = $(data).find('#docHTML');
+	   				$("#mainContent").empty().append(docHTML);
+	   				var errorHTML = $(data).find('#errorHTML');
+	   				$("#errorResultsContent").empty().append(errorHTML);
+				});
+			}
 		</script>
 		
 	</body>
