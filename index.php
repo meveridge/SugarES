@@ -75,12 +75,12 @@
             			<span class="icon-bar"></span>
             			<span class="icon-bar"></span>
           			</button>
-          			<a class="brand" href="#">SugarES</a>
+          			<a class="brand" href="index.php">SugarES</a>
           			<div class="nav-collapse collapse">
             			<ul class="nav">
-              				<li class="active"><a href="#">Home</a></li>
-              				<li><a href="#about">About</a></li>
-              				<li><a href="#contact">Contact</a></li>
+              				<li class="active"><a href="index.php">Home</a></li>
+              				<li><a href="#aboutModal" data-toggle="modal">About</a></li>
+              				<li><a href="#contactModal" data-toggle="modal">Contact</a></li>
             			</ul>
           			</div><!--/.nav-collapse -->
         		</div>
@@ -93,7 +93,7 @@
 				<div class="span3 well">
 					<!--Sidebar content-->
 					<!-- Connection Form -->
-					<form action='/' class="form-inline" id="serverConnection">
+					<form action='index.php' class="form-inline" id="serverConnection">
 						<div class="row-fluid">
 							<label class="span4" for="inputServerName">Server</label>
   							<input class="span8" type="text" id="inputServerName" name="inputServerName" value="localhost" tabindex="1" />
@@ -178,11 +178,51 @@
 				</div>
 			</div>
 		</div>
-
-<?php
-
-
-?>
+		
+		<!-- About Modal -->
+		<div id="aboutModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+  			<div class="modal-header">
+    			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    			<h3 id="aboutModalLabel">About</h3>
+  			</div>
+  			<div class="modal-body">
+    			<p>
+    				SugarES is designed to enable users to maintain their ElasticSearch server in relation to SugarCRM data.<br />
+    				<ul>
+    					<li>
+    						Navigate multiple indicies and browse data through the Tree interface.
+    					</li>
+    					<li>
+    						Create data into an index in ElasticSearch through the Inject interface.
+    					</li>
+    					<li>
+    						Perform manual searches on the data in ElasticSearch through the Search interface.
+    					</li>
+    				</ul>
+    			</p>
+    			<p><a href="https://github.com/meveridge/SugarES">https://github.com/meveridge/SugarES</a></p>
+  			</div>
+  			<div class="modal-footer">
+    			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  			</div>
+		</div>
+		<!-- End About Modal -->
+		
+		<!-- Contact Modal -->
+		<div id="contactModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="contactModalLabel" aria-hidden="true">
+  			<div class="modal-header">
+    			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    			<h3 id="contactModalLabel">Contact</h3>
+  			</div>
+  			<div class="modal-body">
+  				<p>For any issues, feature requests, or general comments please create Issue records or Comments through GitHub.</p>
+    			<p><a href="https://github.com/meveridge/SugarES">https://github.com/meveridge/SugarES</a></p>
+  			</div>
+  			<div class="modal-footer">
+    			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  			</div>
+		</div>
+		<!-- End Contact Modal -->
 
 		<script src="bootstrap/js/jquery-2.0.3.min.js"></script>
 		<script src="bootstrap/js/bootstrap.min.js"></script>
@@ -205,7 +245,7 @@
       				inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
       				inputPort = $form.find( 'input[name="inputPort"]' ).val(),
       				inputIndex = $form.find( 'input[name="inputIndex"]' ).val(),
-      				url = "http://localhost/_test/SugarES/controller.php";
+      				url = "controller.php";
 
   				/* Send the data using post */
   				var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex } );
@@ -283,7 +323,7 @@
 	  					action = "retrieveDocsByIndexAndType",
 	      				inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
 	      				inputPort = $form.find( 'input[name="inputPort"]' ).val(),
-	      				url = "http://localhost/_test/SugarES/controller.php";
+	      				url = "controller.php";
 	
 	  				//Send the data using post
 	  				var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex, inputType: inputType } );
@@ -317,7 +357,7 @@
 	  				action = "retrieveDocById",
 	      			inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
 	      			inputPort = $form.find( 'input[name="inputPort"]' ).val(),
-	      			url = "http://localhost/_test/SugarES/controller.php";
+	      			url = "controller.php";
 				
 				//tree record highlighting
 				if(activeDocRecordId!=""){
