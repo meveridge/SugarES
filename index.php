@@ -11,7 +11,7 @@
 		
 	    <style type="text/css">
 			/* Large desktop */
-			@media (min-width: 980px) { 
+			@media (min-width: 980px) {
 				body {
 					padding-top: 60px;
 				}
@@ -28,7 +28,7 @@
 			}
 
 			/* Landscape phones and down */
-			@media (max-width: 480px) { 
+			@media (max-width: 480px) {
 				.copy {
 					padding: 2.5% 10%;
 				}
@@ -53,6 +53,7 @@
 			ul.treeAction{
 				list-style-type: none;
 				padding: 0px;
+				font-size: 12px;
 			}
 			
 			label{
