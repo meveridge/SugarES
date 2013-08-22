@@ -99,11 +99,13 @@ class ESCall {
 	
 	public function getDocsByQuery($inputType,$queryId,$queryString){
 		
+		$returnedCount = 50;
+		
 		$this->queryString = $this->host . ":" . $this->port;
 		$this->queryString .= "/" . $this->indexName;
 		$this->queryString .= "/" . $inputType;
 		if($queryId!="") $this->queryString .= "/" . $queryId;
-		$this->queryString .= "/_search?q=$queryString";
+		$this->queryString .= "/_search?size=$returnedCount&q=$queryString";
 		/*
 		$this->queryString .= "
 			-d'{
@@ -119,7 +121,10 @@ class ESCall {
 		*/
 		$docResults = $this->executeQuery();
 		
-		$numberofResults = $docResults['hits']['total'];
+		$totalCount = $docResults['hits']['total'];
+		
+		if($totalCount < $returnedCount) $returnedCount = $totalCount;
+		$this->logError("success","record_count","Returned $returnedCount of $totalCount records.");
 		
 		$docHTML = "<fieldset><legend>Record Results</legend>";
 		$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
@@ -127,7 +132,7 @@ class ESCall {
 		
 		foreach($docResults['hits']['hits'] as $rowNum => $data){
 			$docHTML .= "<tr><td>{$data['_type']}</td><td>{$data['_id']}</td><td>{$data['_score']}</td>";
-			$recordHTML = "<dl class='dl-horizontal'>";
+			$recordHTML = "<dl>";
 			foreach($data['_source'] as $fieldName => $fieldValue){
 				$recordHTML .= "<dt>$fieldName</dt><dd>$fieldValue</dd>";
 			}
@@ -135,7 +140,7 @@ class ESCall {
 			
 			$docHTML .= "
 				<td>
-					<a href=\"#\" id=\"popup\" class=\"btn\" data-toggle=\"popover\" data-placement=\"bottom\" data-content=\"$recordHTML\" data-original-title=\"Contents\">
+					<a href=\"#\" class=\"btn popovercls\" data-toggle=\"tooltip\" data-placement=\"left\" data-content=\"$recordHTML\" data-original-title=\"$recordHTML\">
 						<i class=\"icon-info-sign\"></i>
 					</a>
 				</td>
@@ -148,7 +153,7 @@ class ESCall {
 		$docHTML .= "</table>";
 		
 		$docHTML .= "<script type=\"text/javascript\">";
-		$docHTML .= "$(\"#popup\").popover();";
+		$docHTML .= "$(\"a.popovercls\").tooltip({ html : true });";
 		$docHTML .= "</script>";
 
 		return "<div id=\"docResultsHTML\">$docHTML</div>";
@@ -295,7 +300,7 @@ class ESCall {
 				}
 			}
 			$searchHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect\">Type</label>";
-			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect\" id=\"inputTypeSelect\"><option value=\"_all\">Any</option>";
+			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect\" id=\"inputTypeSelect\"><option value=\"*\">Any</option>";
 			$searchHTML .= $moduleOptions;
 			$searchHTML .= "</select></div><div class=\"row-fluid\">";
 			
@@ -314,7 +319,7 @@ class ESCall {
 			$searchHTML .= "<i class=\"icon-search icon-white\"></i>Search";
 			$searchHTML .= "</button></div></div></form>";
 			
-			$searchHTML .= "<script type=\"text/javascript\">$(\"#search\").submit(function(event) {  alert('Handler for .submit() called.'); event.preventDefault(); retrieveDocsByQuery();});</script>";
+			$searchHTML .= "<script type=\"text/javascript\">$(\"#search\").submit(function(event) {  event.preventDefault(); retrieveDocsByQuery();});</script>";
 			
 			return "<div id=\"searchHTML\">$searchHTML</div>";
 		}else{

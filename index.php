@@ -409,7 +409,6 @@
 			}
 			
 			function retrieveDocsByQuery(){
-				alert("ahhh!");
   				
 				var $formConnection = $("#serverConnection"),
 	      			inputServerName = $formConnection.find( 'input[name="inputServerName"]' ).val(),
