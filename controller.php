@@ -15,6 +15,10 @@ if($_POST['action']=="serverConnection"){
 	$treeHTML = $ESServer->generateTreeHTML();
 	echo"<div id=\"treeContent\">$treeHTML</div>";
 	
+	//generate and return the search html
+	$searchHTML = $ESServer->generateSearchHTML();
+	echo"<div id=\"searchContent\">$searchHTML</div>";
+	
 	//generate and return the stats html for the server and all indexes
 	$statsHTML = $ESServer->generateStatsHTML();
 
@@ -61,6 +65,31 @@ if($_POST['action']=="serverConnection"){
 	//during the process of making calls
 	$errorHTML = $ESServer->populateErrorHTML();
 	echo"<div id=\"errorContent\">$errorHTML</div>";
+	
+}else if($_POST['action']=="retrieveDocsByQuery"){
+	
+	require_once("ESCall.php");
+	
+	$inputServerName = $_POST['inputServerName'];
+	$inputPort = $_POST['inputPort'];
+	$inputIndexSelect = $_POST['inputIndexSelect'];
+	$inputTypeSelect = $_POST['inputTypeSelect'];
+	
+	$inputIdQuery = $_POST['inputIdQuery'];
+	$inputQueryString = $_POST['inputQueryString'];
+	
+	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndexSelect);
+	$docResultsHTML = $ESServer->getDocsByQuery($inputTypeSelect,$inputIdQuery,$inputQueryString);
+	
+	echo"<div id=\"docResultsContent\">$docResultsHTML</div>";
+	
+	//populate any error message we have generated 
+	//during the process of making calls
+	$errorHTML = $ESServer->populateErrorHTML();
+	echo"<div id=\"errorContent\">$errorHTML</div>";
+	
+	
+
 	
 }else{
 	echo"No Action Defined.";

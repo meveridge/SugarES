@@ -33,7 +33,6 @@ class ESCall {
 		
 		//load server data (stats)
 		$this->loadServerStats();
-		
 	}
 	
 	public function getDocsByIndexAndType($inputType){
@@ -96,6 +95,63 @@ class ESCall {
 		$docHTML .= "</dl></div></fieldset>";
 
 		return "<div id=\"docHTML\">$docHTML</div>";
+	}
+	
+	public function getDocsByQuery($inputType,$queryId,$queryString){
+		
+		$this->queryString = $this->host . ":" . $this->port;
+		$this->queryString .= "/" . $this->indexName;
+		$this->queryString .= "/" . $inputType;
+		if($queryId!="") $this->queryString .= "/" . $queryId;
+		$this->queryString .= "/_search?q=$queryString";
+		/*
+		$this->queryString .= "
+			-d'{
+				\"highlight\" : {
+	        		\"pre_tags\" : [\"&lt;tag1&gt;\", \"&lt;tag2&gt;\"],
+	        		\"post_tags\" : [\"&lt;/tag1&gt;\", \"&lt;/tag2&gt;\"],
+	        		\"fields\" : {
+	            		\"_all\" : {}
+	        		}
+	    		}
+			}'
+		";
+		*/
+		$docResults = $this->executeQuery();
+		
+		$numberofResults = $docResults['hits']['total'];
+		
+		$docHTML = "<fieldset><legend>Record Results</legend>";
+		$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
+		$docHTML .= "<tr><th>Type</th><th>Id</th><th>Score</th><th>Data</th></tr>";
+		
+		foreach($docResults['hits']['hits'] as $rowNum => $data){
+			$docHTML .= "<tr><td>{$data['_type']}</td><td>{$data['_id']}</td><td>{$data['_score']}</td>";
+			$recordHTML = "<dl class='dl-horizontal'>";
+			foreach($data['_source'] as $fieldName => $fieldValue){
+				$recordHTML .= "<dt>$fieldName</dt><dd>$fieldValue</dd>";
+			}
+			$recordHTML .= "</dl>";
+			
+			$docHTML .= "
+				<td>
+					<a href=\"#\" id=\"popup\" class=\"btn\" data-toggle=\"popover\" data-placement=\"bottom\" data-content=\"$recordHTML\" data-original-title=\"Contents\">
+						<i class=\"icon-info-sign\"></i>
+					</a>
+				</td>
+			";
+			$docHTML .= "</tr>";
+			//<a href="#" class="btn btn-large btn-danger" data-toggle="popover" title="" data-content="And here's some amazing content. It's very engaging. right?" data-original-title="A Title">Click to toggle popover</a>
+			//<a href="#" data-toggle="tooltip" title="first tooltip">hover over me</a>
+		}
+		
+		$docHTML .= "</table>";
+		
+		$docHTML .= "<script type=\"text/javascript\">";
+		$docHTML .= "$(\"#popup\").popover();";
+		$docHTML .= "</script>";
+
+		return "<div id=\"docResultsHTML\">$docHTML</div>";
 	}
 	
 	/* loadESMetadata()
@@ -221,9 +277,50 @@ class ESCall {
 		}else{
 			$this->logError("error","empty_array","ESMetadata is Empty, please check the settings entered.");
 			return "( empty )";
-			
 		}
-		
+	}
+
+	public function generateSearchHTML(){
+		if(count($this->ESMetadata['indexes'])>0){
+			
+			$searchHTML = "<form action='index.php' class=\"form-inline\" id=\"search\">";
+			$searchHTML .= "<div class=\"row-fluid\"><label class=\"span4\" for=\"inputIndexSelect\">Index</label>";
+			$searchHTML .= "<select class=\"span8\" name=\"inputIndexSelect\" id=\"inputIndexSelect\">";
+			
+			$moduleOptions = "";
+			foreach($this->ESMetadata['indexes'] as $indexName => $metadata){
+				$searchHTML .= "<option value=\"$indexName\">$indexName</option>";
+				foreach($metadata['modules'] as $moduleName => $fields){
+					$moduleOptions .= "<option value=\"$moduleName\">$moduleName</option>";	
+				}
+			}
+			$searchHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect\">Type</label>";
+			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect\" id=\"inputTypeSelect\"><option value=\"_all\">Any</option>";
+			$searchHTML .= $moduleOptions;
+			$searchHTML .= "</select></div><div class=\"row-fluid\">";
+			
+			$searchHTML .= "<label class=\"span4\" for=\"inputIdQuery\">Id</label>";
+			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputIdQuery\" name=\"inputIdQuery\" placeholder=\"(optional)\" />";
+			
+			$searchHTML .= "</div><div class=\"row-fluid\">";
+			
+			$searchHTML .= "<label class=\"span4\" for=\"inputQueryString\">Query</label>";
+			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputQueryString\" name=\"inputQueryString\" placeholder=\"Enter Query String...\" />";
+			
+			$searchHTML .= "</div><div class=\"row-fluid\">";
+			
+			$searchHTML .= "<div class=\"form-actions\">";
+			$searchHTML .= "<button id=\"searchSubmit\" type=\"submit\" class=\"btn btn-primary pull-right\">";
+			$searchHTML .= "<i class=\"icon-search icon-white\"></i>Search";
+			$searchHTML .= "</button></div></div></form>";
+			
+			$searchHTML .= "<script type=\"text/javascript\">$(\"#search\").submit(function(event) {  alert('Handler for .submit() called.'); event.preventDefault(); retrieveDocsByQuery();});</script>";
+			
+			return "<div id=\"searchHTML\">$searchHTML</div>";
+		}else{
+			$this->logError("error","empty_array","ESMetadata is Empty, please check the settings entered.");
+			return "( empty )";
+		}
 	}
 
 	/*generateStatsHTML(0)
@@ -343,7 +440,7 @@ class ESCall {
 	}
 	
 	public function executeQuery($method = "XGET"){
-		//echo"execute executeQuery:$method:url={".$this->queryString."}<br>";
+
 		// create a new cURL resource
 		$ch = curl_init();
 		$this->logError("info","curl_url",$this->queryString);
@@ -352,18 +449,14 @@ class ESCall {
 		curl_setopt($ch, CURLOPT_URL, $this->queryString);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		if($method=="XPOST"){
-			//curl_setopt($ch, CURLOPT_POST, TRUE);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');	
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $this->jsonQueryString);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+			//curl_setopt($ch, CURLOPT_POSTFIELDS, $this->jsonQueryString);	
 		}elseif($method=="XPUT"){
-			//curl_setopt($ch, CURLOPT_PUT, TRUE);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 			//curl_setopt($ch, CURLOPT_POSTFIELDS, $this->jsonQueryString);
 		}
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		
-		
-		//
 		// grab URL and pass it to the browser
 		$results = curl_exec($ch);
 		
@@ -371,8 +464,6 @@ class ESCall {
 		if(!empty($curlError)){
 			$this->logError("error","curl_error",$curlError);
 		}
-		
-		//if($results){echo"Results = TRue";}
 		
 		// close cURL resource, and free up system resources
 		curl_close($ch);
@@ -388,56 +479,6 @@ class ESCall {
 		
 		return $result_array;	
 	}
-	
-	
-	
-//everything below here is to  be deleted....
-
-	
-	
-	
-	
-	public function addFilter(){
-		
-	}
-	
-	public function buildFilterOptions($indexNameOverride = "",$typeOverride = ""){
-		echo"execute buildFilterOptions<br>";
-		if($indexNameOverride != "") $this->indexName = $indexNameOverride;
-		if($typeOverride != "") $this->type = $typeOverride;
-		
-		$this->queryString = $this->host . ":" . $this->port;
-		$this->queryString .= ($indexNameOverride==""?"":"/".$this->indexName);
-		$this->queryString .= ($typeOverride==""?"":"/".$this->type);
-		$this->queryString .= "/_mapping";
-		
-		$filterOptions = $this->executeQuery();
-		return $filterOptions;
-	}
-	
-	public function buildQueryString(){
-		echo"execute buildQueryString<br>";
-		
-	}
-	
-	public function buildInsertString($indexNameOverride = "", $typeOverride = "", $docId = ""){
-		if($indexNameOverride != "") $this->indexName = $indexNameOverride;
-		if($typeOverride != "") $this->type = $typeOverride;
-		
-		$this->queryString = $this->host . ":" . $this->port;
-		$this->queryString .= ($indexNameOverride==""?"":"/".$this->indexName);
-		$this->queryString .= ($typeOverride==""?"":"/".$this->type);
-		$this->queryString .= ($docId==""?"/".uniqid():"/".$docId);
-		
-		$this->jsonQueryString = json_encode($this->fieldArray);
-		
-	}
-	
-	public function addFieldToUpdateString($field,$value){
-		$this->fieldArray[$field] = $value;
-	}
-	
-
 }
 
 ?>

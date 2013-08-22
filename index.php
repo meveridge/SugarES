@@ -111,16 +111,12 @@
   							<input class="span8" type="text" id="inputIndex" name="inputIndex" placeholder="(optional)" />
 						</div>
 						
-						<!--<input type="hidden" id="inputIndex" name="inputIndex" />-->
-						
 						<div class="row-fluid">
 							<div class="form-actions">
 								<button id="serverConnectionSubmit" type="submit" class="btn btn-primary pull-right" tabindex="3">
 									<i class="icon-refresh icon-white"></i>
 									Load
 								</button>
-							<!-- <a class="btn btn-primary span6" id="serverConnectionSubmit" style="align:center;" tabindex="3"><i class="icon-refresh icon-white"></i> Load</a> -->
-							<!-- <input type="submit" style="border: none;width: 0;height: 0;line-height: 0;padding:0;margin: 0;" /> -->
 							</div>
 						</div>
 					</form>
@@ -131,7 +127,7 @@
 								<ul class="nav nav-tabs">
                 					<li class="active"><a href="#treeContent" data-toggle="tab">Tree</a></li>
                 					<li><a href="#tab2" data-toggle="tab">Inject</a></li>
-                					<li><a href="#tab3" data-toggle="tab">Search</a></li>
+                					<li><a href="#searchContent" data-toggle="tab">Search</a></li>
               					</ul>
 								<div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
                 					<div class="tab-pane active" id="treeContent">
@@ -140,9 +136,11 @@
                 					<div class="tab-pane" id="tab2">
                   						<p>Inject section still to be built...</p>
                 					</div>
-                					<div class="tab-pane" id="tab3">
-                  						<p>Search section still to be built...</p>
-                					</div>
+                					<!-- Search Tab -->
+                					<div class="tab-pane" id="searchContent">
+                						<!-- Search Form -->
+										
+                					</div> <!-- /Search Tab -->
               					</div>
             				</div> <!-- /tabbable -->
 						</div>
@@ -243,9 +241,10 @@
 		<script src="bootstrap/js/bootstrap-tab.js"></script>
 		<script src="bootstrap/js/bootstrap-button.js"></script>
 		<script src="bootstrap/js/bootstrap-collapse.js"></script>
+		<script src="bootstrap/js/bootstrap-tooltip.js"></script>
+		<script src="bootstrap/js/bootstrap-popover.js"></script>
 
 		<script type="text/javascript">
-			//$('#loadingModal').hide();
 			
 			//capture the form submit and process the ajax
 			/* attach a submit handler to the form */
@@ -272,6 +271,10 @@
   					
     				var treeContent = $(data).find('#treeHTML');
     				$("#treeContent").empty().append(treeContent);
+    				
+    				var searchHTML = $(data).find('#searchHTML');
+    				$("#searchContent").empty().append(searchHTML);
+    				//
     				
     				var serverStatsHTML = $(data).find('#serverStatsHTML');
     				$("#serverStatsContent").empty().append(serverStatsHTML);
@@ -400,6 +403,33 @@
 	
 	  				var docHTML = $(data).find('#docHTML');
 	   				$("#mainContent").empty().append(docHTML);
+	   				var errorHTML = $(data).find('#errorHTML');
+	   				$("#errorResultsContent").empty().append(errorHTML);
+				});
+			}
+			
+			function retrieveDocsByQuery(){
+				alert("ahhh!");
+  				
+				var $formConnection = $("#serverConnection"),
+	      			inputServerName = $formConnection.find( 'input[name="inputServerName"]' ).val(),
+	      			inputPort = $formConnection.find( 'input[name="inputPort"]' ).val();
+	      		var $formSearch = $("#search"),
+	      			inputIndexSelect = $formSearch.find( 'select[name="inputIndexSelect"]' ).val(),
+	      			inputTypeSelect = $formSearch.find( 'select[name="inputTypeSelect"]' ).val(),
+	      			inputIdQuery = $formSearch.find( 'input[name="inputIdQuery"]' ).val(),
+	      			inputQueryString = $formSearch.find( 'input[name="inputQueryString"]' ).val(),
+	      			action = "retrieveDocsByQuery",
+	      			url = "controller.php";
+				
+	  			//Send the data using post
+	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, inputIdQuery: inputIdQuery, inputQueryString: inputQueryString } );
+	
+	  			//Put the results in a div
+	  			posting.done(function(data) {
+	
+	  				var docResultsHTML = $(data).find('#docResultsHTML');
+	   				$("#mainContent").empty().append(docResultsHTML);
 	   				var errorHTML = $(data).find('#errorHTML');
 	   				$("#errorResultsContent").empty().append(errorHTML);
 				});
