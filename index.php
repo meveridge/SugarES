@@ -174,6 +174,7 @@
 					
 					<div class="row-fluid" id="mainContent">
 						<!-- Main Content -->
+						<div id="mainContentEmpty"></div>
 					</div>
 					<div class="row-fluid" id="errorResultsContent">
 						<!-- Error Results -->
@@ -254,6 +255,9 @@
 				
   				/* stop form from submitting normally */
   				event.preventDefault();
+  				
+  				//clear main content
+  				$("#mainContent").empty();
 
   				/* get some values from elements on the page: */
   				var $form = $( this ),
@@ -428,8 +432,15 @@
 	  			posting.done(function(data) {
 	
 	  				var docResultsHTML = $(data).find('#docResultsHTML');
-	   				$("#mainContent").empty().append(docResultsHTML);
+	  				
+	  				if($("#mainContentEmpty")){
+	  					//main section is empty
+	  				}else{
+	  					//main section has something in it... 
+	  				}
+	  				$("#mainContent").empty().append(docResultsHTML);
 	   				var errorHTML = $(data).find('#errorHTML');
+	   				
 	   				$("#errorResultsContent").empty().append(errorHTML);
 				});
 			}

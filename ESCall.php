@@ -127,34 +127,39 @@ class ESCall {
 		$this->logError("success","record_count","Returned $returnedCount of $totalCount records.");
 		
 		$docHTML = "<fieldset><legend>Record Results</legend>";
-		$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
-		$docHTML .= "<tr><th>Type</th><th>Id</th><th>Score</th><th>Data</th></tr>";
-		
-		foreach($docResults['hits']['hits'] as $rowNum => $data){
-			$docHTML .= "<tr><td>{$data['_type']}</td><td>{$data['_id']}</td><td>{$data['_score']}</td>";
-			$recordHTML = "<dl>";
-			foreach($data['_source'] as $fieldName => $fieldValue){
-				$recordHTML .= "<dt>$fieldName</dt><dd>$fieldValue</dd>";
-			}
-			$recordHTML .= "</dl>";
+		if($totalCount>0){
+			$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
+			$docHTML .= "<tr><th>Type</th><th>Id</th><th>Score</th><th>Data</th></tr>";
 			
-			$docHTML .= "
-				<td>
-					<a href=\"#\" class=\"btn popovercls\" data-toggle=\"tooltip\" data-placement=\"left\" data-content=\"$recordHTML\" data-original-title=\"$recordHTML\">
-						<i class=\"icon-info-sign\"></i>
-					</a>
-				</td>
-			";
-			$docHTML .= "</tr>";
-			//<a href="#" class="btn btn-large btn-danger" data-toggle="popover" title="" data-content="And here's some amazing content. It's very engaging. right?" data-original-title="A Title">Click to toggle popover</a>
-			//<a href="#" data-toggle="tooltip" title="first tooltip">hover over me</a>
+			foreach($docResults['hits']['hits'] as $rowNum => $data){
+				$docHTML .= "<tr><td>{$data['_type']}</td><td><a href=\"#\" onClick=\"retrieveDocById('{$this->indexName}','{$data['_type']}','{$data['_id']}');\">{$data['_id']}</a></td><td>{$data['_score']}</td>";
+				$recordHTML = "<dl>";
+				foreach($data['_source'] as $fieldName => $fieldValue){
+					$fieldValue = htmlspecialchars($fieldValue);
+					$recordHTML .= "<dt>$fieldName</dt><dd>$fieldValue</dd>";
+				}
+				$recordHTML .= "</dl>";
+				
+				$docHTML .= "
+					<td>
+						<a href=\"#\" class=\"btn popovercls\" data-toggle=\"tooltip\" data-placement=\"left\" data-content=\"$recordHTML\" data-original-title=\"$recordHTML\">
+							<i class=\"icon-info-sign\"></i>
+						</a>
+					</td>
+				";
+				$docHTML .= "</tr>";
+				//<a href="#" class="btn btn-large btn-danger" data-toggle="popover" title="" data-content="And here's some amazing content. It's very engaging. right?" data-original-title="A Title">Click to toggle popover</a>
+				//<a href="#" data-toggle="tooltip" title="first tooltip">hover over me</a>
+			}
+			
+			$docHTML .= "</table>";
+			
+			$docHTML .= "<script type=\"text/javascript\">";
+			$docHTML .= "$(\"a.popovercls\").tooltip({ html : true });";
+			$docHTML .= "</script>";
+		}else{
+			$docHTML .= "No results.";
 		}
-		
-		$docHTML .= "</table>";
-		
-		$docHTML .= "<script type=\"text/javascript\">";
-		$docHTML .= "$(\"a.popovercls\").tooltip({ html : true });";
-		$docHTML .= "</script>";
 
 		return "<div id=\"docResultsHTML\">$docHTML</div>";
 	}
