@@ -68,6 +68,8 @@
 		<input type="hidden" id="activeDocRecordType" />
 		<input type="hidden" id="activeDocRecordId" />
 		
+		<input type="hidden" id="previousContentId" value="1" />
+		
 		<!-- nav bar -->
 		<div class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
@@ -146,7 +148,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="span8">
+				<div id="bodyContent" class="span8">
 					<!--Body content-->
 					
 					<div class="row-fluid hidden-phone">
@@ -176,6 +178,7 @@
 						<!-- Main Content -->
 						<div id="mainContentEmpty"></div>
 					</div>
+					
 					<div class="row-fluid" id="errorResultsContent">
 						<!-- Error Results -->
     				</div>
@@ -297,7 +300,32 @@
     				$('#loadingModal').modal('hide')
   				});
 			});
-			
+
+			function populateMainContent(newMainContent){
+	  			if($("#mainContent").contents().length==0){
+	  				//main section is empty
+	  			}else{
+	  				//main section has something in it... 
+	  					
+	  				//create previous section
+	  				var rndmNumber = $("#previousContentId").val();
+	  				$('#previousContentId').val( function(i, oldval) {
+						return ++oldval;
+					});
+	  				var preIdString = "";
+	  				preIdString = "previousMainContent_" + rndmNumber;
+	  				
+	  				$("#bodyContent").append("<div class='row-fluid hidden' id='"+preIdString+"'><!-- Previous Main Content --></div>");
+	  					
+	  				//move content into it
+	  				$("#"+preIdString).empty().append($("#mainContent").contents());
+	  					
+	  				//then empty main and add back button
+	  				$("#mainContent").empty().append("<a href=\"#\" onClick=\"$('#mainContent').empty().append($('#"+preIdString+"').contents());\"><i class='icon-chevron-left'></i></a>");
+	  			}
+	  			$("#mainContent").append(newMainContent);
+			}
+
 			function changeActiveIndex(newActiveIndex){
 				var oldActiveIndexId = $("#activeIndexId").val();
 				$("#"+oldActiveIndexId).css("display","none");
@@ -406,7 +434,8 @@
 	  			posting.done(function(data) {
 	
 	  				var docHTML = $(data).find('#docHTML');
-	   				$("#mainContent").empty().append(docHTML);
+	  				populateMainContent(docHTML);
+	   				//$("#mainContent").empty().append(docHTML);
 	   				var errorHTML = $(data).find('#errorHTML');
 	   				$("#errorResultsContent").empty().append(errorHTML);
 				});
@@ -432,15 +461,9 @@
 	  			posting.done(function(data) {
 	
 	  				var docResultsHTML = $(data).find('#docResultsHTML');
+	  				populateMainContent(docResultsHTML);
 	  				
-	  				if($("#mainContentEmpty")){
-	  					//main section is empty
-	  				}else{
-	  					//main section has something in it... 
-	  				}
-	  				$("#mainContent").empty().append(docResultsHTML);
 	   				var errorHTML = $(data).find('#errorHTML');
-	   				
 	   				$("#errorResultsContent").empty().append(errorHTML);
 				});
 			}
