@@ -321,9 +321,22 @@
 	  				$("#"+preIdString).empty().append($("#mainContent").contents());
 	  					
 	  				//then empty main and add back button
-	  				$("#mainContent").empty().append("<a href=\"#\" onClick=\"$('#mainContent').empty().append($('#"+preIdString+"').contents());\"><i class='icon-chevron-left'></i></a>");
+	  				$("#mainContent").empty().append("<a href=\"javascript:loadBackContents('"+preIdString+"')\"><i class='icon-chevron-left'></i></a>");
 	  			}
 	  			$("#mainContent").append(newMainContent);
+			}
+			
+			function loadBackContents(preIdString){
+				
+				//replace main content area with the previous contents area
+				$('#mainContent').empty().append($('#'+preIdString).contents());
+				
+				//retreive doc metadata
+				var inputIndex = $('#mainContent').find( 'input[name="thisContentsIndex"]' ).val();
+				var inputType = $('#mainContent').find( 'input[name="thisContentsType"]' ).val();
+				var inputId = $('#mainContent').find( 'input[name="thisContentsId"]' ).val();
+
+				highlightSelectedRecord(inputIndex,inputType,inputId,false);
 			}
 
 			function changeActiveIndex(newActiveIndex){
@@ -404,19 +417,23 @@
   				}
 			}
 			
-			function retrieveDocById(inputIndex,inputType,inputId){
-				var $form = $("#serverConnection"),
-					activeDocRecord = $("#activeDocRecord").val(),
-	  				action = "retrieveDocById",
-	      			inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
-	      			inputPort = $form.find( 'input[name="inputPort"]' ).val(),
-	      			url = "controller.php";
+			function highlightSelectedRecord(inputIndex,inputType,inputId,createBackHiddenFields){
+				
+				activeDocRecordId = $("#activeDocRecordId").val()
 				
 				//tree record highlighting
 				if(activeDocRecordId!=""){
+					//remove last record's highlight
 					$("#"+$("#activeDocRecordIndex").val()+"_"+$("#activeDocRecordType").val()+"_tree_"+$("#activeDocRecordId").val()).removeClass("muted");
 					$("#"+$("#activeDocRecordIndex").val()+"_"+$("#activeDocRecordType").val()+"_tree_"+$("#activeDocRecordId").val()+"_icon").removeClass("icon-arrow-right");
-					//$("#tree_"+activeDocRecord+"_icon").removeClass("icon-white");
+					
+					if(createBackHiddenFields){
+							
+						//store for retrieval via back button
+						$('#docHTML').append("<input type='hidden' name='thisContentsIndex' value='"+$("#activeDocRecordIndex").val()+"' />");
+						$('#docHTML').append("<input type='hidden' name='thisContentsType' value='"+$("#activeDocRecordType").val()+"' />");
+						$('#docHTML').append("<input type='hidden' name='thisContentsId' value='"+$("#activeDocRecordId").val()+"' />");
+					}
 				}
 				$("#activeDocRecordIndex").val(inputIndex);
 				$("#activeDocRecordType").val(inputType);
@@ -424,8 +441,18 @@
 				
 				$("#"+inputIndex+"_"+inputType+"_tree_"+inputId).addClass("muted");
 				$("#"+inputIndex+"_"+inputType+"_tree_"+inputId+"_icon").addClass("icon-arrow-right");
-				//$("#tree_"+inputId+"_icon").addClass("icon-white");
+			}
+			
+			function retrieveDocById(inputIndex,inputType,inputId){
+				var $form = $("#serverConnection"),
+					activeDocRecordId = $("#activeDocRecordId").val(),
+	  				action = "retrieveDocById",
+	      			inputServerName = $form.find( 'input[name="inputServerName"]' ).val(),
+	      			inputPort = $form.find( 'input[name="inputPort"]' ).val(),
+	      			url = "controller.php";
 				
+				//change the arrow in the tree for the correct record
+				highlightSelectedRecord(inputIndex,inputType,inputId,true);
 				
 	  			//Send the data using post
 	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex, inputType: inputType, inputId: inputId } );
