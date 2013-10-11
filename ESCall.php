@@ -366,10 +366,28 @@ class ESCall {
 			
 			$moduleOptions = "";
 			$typesAccrossAllIndexes = array();
+			$fieldsPerModule = array();
 			foreach($this->ESMetadata['indexes'] as $indexName => $metadata){
 				$injectHTML .= "<option value=\"$indexName\">$indexName</option>";
 				foreach($metadata['modules'] as $moduleName => $fields){
 					$typesAccrossAllIndexes[] = $moduleName;
+					//build field html:
+					$fieldHTML .= "<div id=\"{$indexName}_{$moduleName}\">";
+					foreach($fields['fields'] as $key=>$value){
+						//$value = print_r($value,true);
+						/* $value = 
+Array
+(
+    [type] => string
+)
+						*/
+						$fieldHTML .= "<div class=\"row-fluid\" style='display:none;'>";
+						$fieldHTML .= "<label class=\"span4\" for=\"inputField{$key}_inject\">$key</label>";
+						$fieldHTML .= "<input class=\"span8\" type=\"text\" id=\"inputField{$key}_inject\" name=\"inputField{$key}_inject\" />";	
+						$fieldHTML .= "</div>";
+					}
+					$fieldHTML .= "</div>";
+
 				}
 			}
 
@@ -383,17 +401,9 @@ class ESCall {
 			$injectHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect_inject\">Type</label>";
 			$injectHTML .= "<select class=\"span8\" name=\"inputTypeSelect_inject\" id=\"inputTypeSelect_inject\"><option value=\"*\">Any</option>";
 			$injectHTML .= $moduleOptions;
-			$injectHTML .= "</select></div><div class=\"row-fluid\">";
-			
-			$injectHTML .= "<label class=\"span4\" for=\"inputIdQuery_inject\">Id</label>";
-			$injectHTML .= "<input class=\"span8\" type=\"text\" id=\"inputIdQuery_inject\" name=\"inputIdQuery_inject\" placeholder=\"(optional)\" disabled=\"true\" />";
-			
-			$injectHTML .= "</div><div class=\"row-fluid\">";
-			
-			$injectHTML .= "<label class=\"span4\" for=\"inputQueryString_inject\">Query</label>";
-			$injectHTML .= "<input class=\"span8\" type=\"text\" id=\"inputQueryString_inject\" name=\"inputQueryString_inject\" placeholder=\"Enter Query String...\" />";
-			
-			$injectHTML .= "</div><div class=\"row-fluid\">";
+			$injectHTML .= "</select></div>";
+
+			$injectHTML .= $fieldHTML;
 			
 			$injectHTML .= "<div class=\"form-actions\">";
 			$injectHTML .= "<button id=\"injectSubmit\" type=\"submit\" class=\"btn btn-primary pull-right\">";
