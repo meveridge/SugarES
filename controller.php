@@ -18,6 +18,10 @@ if($_POST['action']=="serverConnection"){
 	//generate and return the search html
 	$searchHTML = $ESServer->generateSearchHTML();
 	echo"<div id=\"searchContent\">$searchHTML</div>";
+
+	//generate and return the inject html
+	$injectHTML = $ESServer->generateInjectHTML();
+	echo"<div id=\"injectContent\">$injectHTML</div>";
 	
 	//generate and return the stats html for the server and all indexes
 	$statsHTML = $ESServer->generateStatsHTML();

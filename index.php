@@ -128,15 +128,15 @@
 							<div class="tabbable" style="margin-bottom: 18px;">
 								<ul class="nav nav-tabs">
                 					<li class="active"><a href="#treeContent" data-toggle="tab">Tree</a></li>
-                					<li><a href="#tab2" data-toggle="tab">Inject</a></li>
+                					<li><a href="#injectContent" data-toggle="tab">Inject</a></li>
                 					<li><a href="#searchContent" data-toggle="tab">Search</a></li>
               					</ul>
 								<div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
                 					<div class="tab-pane active" id="treeContent">
                 						Enter in the ElasticSearch Server Properties and click Load.
                 					</div>
-                					<div class="tab-pane" id="tab2">
-                  						<p>Inject section still to be built...</p>
+                					<div class="tab-pane" id="injectContent">
+                  						<!-- Inject Form -->
                 					</div>
                 					<!-- Search Tab -->
                 					<div class="tab-pane" id="searchContent">
@@ -276,12 +276,16 @@
   				/* Put the results in a div */
   				posting.done(function( data ) {
   					
+  					//tab structures
     				var treeContent = $(data).find('#treeHTML');
     				$("#treeContent").empty().append(treeContent);
     				
     				var searchHTML = $(data).find('#searchHTML');
     				$("#searchContent").empty().append(searchHTML);
-    				//
+
+    				var injectHTML = $(data).find('#injectHTML');
+    				$("#injectContent").empty().append(injectHTML);
+    				//end tab structrures
     				
     				var serverStatsHTML = $(data).find('#serverStatsHTML');
     				$("#serverStatsContent").empty().append(serverStatsHTML);
@@ -344,6 +348,11 @@
 				$("#"+oldActiveIndexId).css("display","none");
 				$("#activeIndexId").val("index_stats_"+newActiveIndex);
 				$("#index_stats_"+newActiveIndex).css("display","inline");
+				
+				//auto select the index in the search and inject dds
+				$("#inputIndexSelect_search").val(newActiveIndex);
+				$("#inputIndexSelect_inject").val(newActiveIndex);
+
 			}
 			
 			function changeTreeIcon(inputIndex,inputType){
@@ -474,13 +483,13 @@
 	      			inputServerName = $formConnection.find( 'input[name="inputServerName"]' ).val(),
 	      			inputPort = $formConnection.find( 'input[name="inputPort"]' ).val();
 	      		var $formSearch = $("#search"),
-	      			inputIndexSelect = $formSearch.find( 'select[name="inputIndexSelect"]' ).val(),
-	      			inputTypeSelect = $formSearch.find( 'select[name="inputTypeSelect"]' ).val(),
-	      			inputIdQuery = $formSearch.find( 'input[name="inputIdQuery"]' ).val(),
-	      			inputQueryString = $formSearch.find( 'input[name="inputQueryString"]' ).val(),
+	      			inputIndexSelect = $formSearch.find( 'select[name="inputIndexSelect_search"]' ).val(),
+	      			inputTypeSelect = $formSearch.find( 'select[name="inputTypeSelect_search"]' ).val(),
+	      			inputIdQuery = $formSearch.find( 'input[name="inputIdQuery_search"]' ).val(),
+	      			inputQueryString = $formSearch.find( 'input[name="inputQueryString_search"]' ).val(),
 	      			action = "retrieveDocsByQuery",
 	      			url = "controller.php";
-				
+
 	  			//Send the data using post
 	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, inputIdQuery: inputIdQuery, inputQueryString: inputQueryString } );
 	

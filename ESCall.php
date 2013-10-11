@@ -104,8 +104,12 @@ class ESCall {
 		$this->queryString = $this->host . ":" . $this->port;
 		$this->queryString .= "/" . $this->indexName;
 		$this->queryString .= "/" . $inputType;
-		if($queryId!="") $this->queryString .= "/" . $queryId;
-		$this->queryString .= "/_search?size=$returnedCount&q=$queryString";
+		if($queryId != ""){
+			$this->queryString .= "/" . $queryId;
+		}else{
+			$this->queryString .= "/_search?size=$returnedCount&q=$queryString";	
+		}
+		
 		/*
 		$this->queryString .= "
 			-d'{
@@ -123,6 +127,14 @@ class ESCall {
 		
 		$totalCount = $docResults['hits']['total'];
 		
+		if($totalCount == "" && $docResults['exists'] == "true"){
+			//means we searched on an id, not a query... or there was an error.
+			$totalCount = 1;
+			$resultArray = array($docResults);
+		}else{
+			$resultArray = $docResults['hits']['hits'];
+		}
+
 		if($totalCount < $returnedCount) $returnedCount = $totalCount;
 		$this->logError("success","record_count","Returned $returnedCount of $totalCount records.");
 		
@@ -131,7 +143,7 @@ class ESCall {
 			$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
 			$docHTML .= "<tr><th>Type</th><th>Id</th><th>Score</th><th>Data</th></tr>";
 			
-			foreach($docResults['hits']['hits'] as $rowNum => $data){
+			foreach($resultArray as $rowNum => $data){
 				$docHTML .= "<tr><td>{$data['_type']}</td><td><a href=\"#\" onClick=\"retrieveDocById('{$this->indexName}','{$data['_type']}','{$data['_id']}');\">{$data['_id']}</a></td><td>{$data['_score']}</td>";
 				$recordHTML = "<dl>";
 				foreach($data['_source'] as $fieldName => $fieldValue){
@@ -290,32 +302,42 @@ class ESCall {
 		}
 	}
 
-	public function generateSearchHTML(){
+	public function generateSearchHTML($indexOverride = ""){
 		if(count($this->ESMetadata['indexes'])>0){
 			
 			$searchHTML = "<form action='index.php' class=\"form-inline\" id=\"search\">";
-			$searchHTML .= "<div class=\"row-fluid\"><label class=\"span4\" for=\"inputIndexSelect\">Index</label>";
-			$searchHTML .= "<select class=\"span8\" name=\"inputIndexSelect\" id=\"inputIndexSelect\">";
+			$searchHTML .= "<div class=\"row-fluid\"><label class=\"span4\" for=\"inputIndexSelect_search\">Index</label>";
+			$searchHTML .= "<select class=\"span8\" name=\"inputIndexSelect_search\" id=\"inputIndexSelect_search\">";
 			
 			$moduleOptions = "";
+			$typesAccrossAllIndexes = array();
 			foreach($this->ESMetadata['indexes'] as $indexName => $metadata){
 				$searchHTML .= "<option value=\"$indexName\">$indexName</option>";
+				if($indexOverride != "" && $indexOverride != $indexName) continue;
 				foreach($metadata['modules'] as $moduleName => $fields){
-					$moduleOptions .= "<option value=\"$moduleName\">$moduleName</option>";	
+					$typesAccrossAllIndexes[] = $moduleName;
 				}
 			}
-			$searchHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect\">Type</label>";
-			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect\" id=\"inputTypeSelect\"><option value=\"*\">Any</option>";
+
+			$sortedTypes = array_unique($typesAccrossAllIndexes);
+			sort($sortedTypes);
+
+			foreach($sortedTypes as $key => $moduleName){
+				$moduleOptions .= "<option value=\"$moduleName\">$moduleName</option>";	
+			}
+
+			$searchHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect_search\">Type</label>";
+			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect_search\" id=\"inputTypeSelect_search\"><option value=\"*\">Any</option>";
 			$searchHTML .= $moduleOptions;
 			$searchHTML .= "</select></div><div class=\"row-fluid\">";
 			
-			$searchHTML .= "<label class=\"span4\" for=\"inputIdQuery\">Id</label>";
-			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputIdQuery\" name=\"inputIdQuery\" placeholder=\"(optional)\" />";
+			$searchHTML .= "<label class=\"span4\" for=\"inputIdQuery_search\">Id</label>";
+			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputIdQuery_search\" name=\"inputIdQuery_search\" placeholder=\"(optional)\" disabled=\"true\" />";
 			
 			$searchHTML .= "</div><div class=\"row-fluid\">";
 			
-			$searchHTML .= "<label class=\"span4\" for=\"inputQueryString\">Query</label>";
-			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputQueryString\" name=\"inputQueryString\" placeholder=\"Enter Query String...\" />";
+			$searchHTML .= "<label class=\"span4\" for=\"inputQueryString_search\">Query</label>";
+			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputQueryString_search\" name=\"inputQueryString_search\" placeholder=\"Enter Query String...\" />";
 			
 			$searchHTML .= "</div><div class=\"row-fluid\">";
 			
@@ -324,9 +346,65 @@ class ESCall {
 			$searchHTML .= "<i class=\"icon-search icon-white\"></i>Search";
 			$searchHTML .= "</button></div></div></form>";
 			
-			$searchHTML .= "<script type=\"text/javascript\">$(\"#search\").submit(function(event) {  event.preventDefault(); retrieveDocsByQuery();});</script>";
+			$searchHTML .= "<script type=\"text/javascript\">$(\"#search\").submit(function(event) {  event.preventDefault(); retrieveDocsByQuery();}); ";
+			$searchHTML .= "$(\"#inputTypeSelect_search\").change(function() { if($(this).val()==\"*\"){ $(\"#inputIdQuery_search\").prop('disabled', true); $(\"#inputQueryString_search\").prop('disabled', false); ";
+			$searchHTML .= "}else{ $(\"#inputIdQuery_search\").prop('disabled', false); $(\"#inputQueryString_search\").prop('disabled', false); }});</script>";
 			
 			return "<div id=\"searchHTML\">$searchHTML</div>";
+		}else{
+			$this->logError("error","empty_array","ESMetadata is Empty, please check the settings entered.");
+			return "( empty )";
+		}
+	}
+
+	public function generateInjectHTML(){
+		if(count($this->ESMetadata['indexes'])>0){
+			
+			$injectHTML = "<form action='index.php' class=\"form-inline\" id=\"inject\">";
+			$injectHTML .= "<div class=\"row-fluid\"><label class=\"span4\" for=\"inputIndexSelect_inject\">Index</label>";
+			$injectHTML .= "<select class=\"span8\" name=\"inputIndexSelect_inject\" id=\"inputIndexSelect_inject\">";
+			
+			$moduleOptions = "";
+			$typesAccrossAllIndexes = array();
+			foreach($this->ESMetadata['indexes'] as $indexName => $metadata){
+				$injectHTML .= "<option value=\"$indexName\">$indexName</option>";
+				foreach($metadata['modules'] as $moduleName => $fields){
+					$typesAccrossAllIndexes[] = $moduleName;
+				}
+			}
+
+			$sortedTypes = array_unique($typesAccrossAllIndexes);
+			sort($sortedTypes);
+
+			foreach($sortedTypes as $key => $moduleName){
+				$moduleOptions .= "<option value=\"$moduleName\">$moduleName</option>";	
+			}
+
+			$injectHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect_inject\">Type</label>";
+			$injectHTML .= "<select class=\"span8\" name=\"inputTypeSelect_inject\" id=\"inputTypeSelect_inject\"><option value=\"*\">Any</option>";
+			$injectHTML .= $moduleOptions;
+			$injectHTML .= "</select></div><div class=\"row-fluid\">";
+			
+			$injectHTML .= "<label class=\"span4\" for=\"inputIdQuery_inject\">Id</label>";
+			$injectHTML .= "<input class=\"span8\" type=\"text\" id=\"inputIdQuery_inject\" name=\"inputIdQuery_inject\" placeholder=\"(optional)\" disabled=\"true\" />";
+			
+			$injectHTML .= "</div><div class=\"row-fluid\">";
+			
+			$injectHTML .= "<label class=\"span4\" for=\"inputQueryString_inject\">Query</label>";
+			$injectHTML .= "<input class=\"span8\" type=\"text\" id=\"inputQueryString_inject\" name=\"inputQueryString_inject\" placeholder=\"Enter Query String...\" />";
+			
+			$injectHTML .= "</div><div class=\"row-fluid\">";
+			
+			$injectHTML .= "<div class=\"form-actions\">";
+			$injectHTML .= "<button id=\"injectSubmit\" type=\"submit\" class=\"btn btn-primary pull-right\">";
+			$injectHTML .= "<i class=\"icon-search icon-white\"></i>Inject";
+			$injectHTML .= "</button></div></div></form>";
+			
+			$injectHTML .= "<script type=\"text/javascript\">$(\"#inject\").submit(function(event) {  event.preventDefault(); retrieveDocsByQuery();}); ";
+			$injectHTML .= "$(\"#inputTypeSelect_inject\").change(function() { if($(this).val()==\"*\"){ $(\"#inputIdQuery_inject\").prop('disabled', true); $(\"#inputQueryString_inject\").prop('disabled', false); ";
+			$injectHTML .= "}else{ $(\"#inputIdQuery_inject\").prop('disabled', false); $(\"#inputQueryString_inject\").prop('disabled', false); }});</script>";
+			
+			return "<div id=\"injectHTML\">$injectHTML</div>";
 		}else{
 			$this->logError("error","empty_array","ESMetadata is Empty, please check the settings entered.");
 			return "( empty )";
