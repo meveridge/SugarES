@@ -362,7 +362,7 @@ class ESCall {
 			
 			$injectHTML = "<form action='index.php' class=\"form-inline\" id=\"inject\">";
 			$injectHTML .= "<div class=\"row-fluid\"><label class=\"span4\" for=\"inputIndexSelect_inject\">Index</label>";
-			$injectHTML .= "<select class=\"span8\" name=\"inputIndexSelect_inject\" id=\"inputIndexSelect_inject\">";
+			$injectHTML .= "<input type='hidden' id='current_inputIndexSelect_inject' /><select class=\"span8\" name=\"inputIndexSelect_inject\" id=\"inputIndexSelect_inject\">";
 			
 			$moduleOptions = "";
 			$typesAccrossAllIndexes = array();
@@ -372,8 +372,8 @@ class ESCall {
 				foreach($metadata['modules'] as $moduleName => $fields){
 					$typesAccrossAllIndexes[] = $moduleName;
 					//build field html:
-					$fieldHTML .= "<div id=\"{$indexName}_{$moduleName}\">";
-					foreach($fields['fields'] as $key=>$value){
+					$fieldHTML .= "<div id=\"{$indexName}_{$moduleName}_fields\" style='display:none;'>";
+					foreach($fields['fields'] as $fieldName=>$value){
 						//$value = print_r($value,true);
 						/* $value = 
 Array
@@ -381,9 +381,9 @@ Array
     [type] => string
 )
 						*/
-						$fieldHTML .= "<div class=\"row-fluid\" style='display:none;'>";
-						$fieldHTML .= "<label class=\"span4\" for=\"inputField{$key}_inject\">$key</label>";
-						$fieldHTML .= "<input class=\"span8\" type=\"text\" id=\"inputField{$key}_inject\" name=\"inputField{$key}_inject\" />";	
+						$fieldHTML .= "<div class=\"row-fluid\">";
+						$fieldHTML .= "<label class=\"span4\" for=\"inputField{$fieldName}_inject\">$fieldName</label>";
+						$fieldHTML .= "<input class=\"span8\" type=\"text\" id=\"inputField{$fieldName}_inject\" name=\"inputField{$fieldName}_inject\" ".($fieldName=="module"?"disabled='true' value='$moduleName' ":"")."/>";	
 						$fieldHTML .= "</div>";
 					}
 					$fieldHTML .= "</div>";
@@ -399,7 +399,7 @@ Array
 			}
 
 			$injectHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect_inject\">Type</label>";
-			$injectHTML .= "<select class=\"span8\" name=\"inputTypeSelect_inject\" id=\"inputTypeSelect_inject\"><option value=\"*\">Any</option>";
+			$injectHTML .= "<select class=\"span8\" name=\"inputTypeSelect_inject\" id=\"inputTypeSelect_inject\"><option value=\"\"></option>";
 			$injectHTML .= $moduleOptions;
 			$injectHTML .= "</select></div>";
 
@@ -407,12 +407,23 @@ Array
 			
 			$injectHTML .= "<div class=\"form-actions\">";
 			$injectHTML .= "<button id=\"injectSubmit\" type=\"submit\" class=\"btn btn-primary pull-right\">";
-			$injectHTML .= "<i class=\"icon-search icon-white\"></i>Inject";
-			$injectHTML .= "</button></div></div></form>";
+			$injectHTML .= "<i class=\"icon-search icon-white\"></i>Inject Data";
+			$injectHTML .= "</button></div></form>";
 			
-			$injectHTML .= "<script type=\"text/javascript\">$(\"#inject\").submit(function(event) {  event.preventDefault(); retrieveDocsByQuery();}); ";
-			$injectHTML .= "$(\"#inputTypeSelect_inject\").change(function() { if($(this).val()==\"*\"){ $(\"#inputIdQuery_inject\").prop('disabled', true); $(\"#inputQueryString_inject\").prop('disabled', false); ";
-			$injectHTML .= "}else{ $(\"#inputIdQuery_inject\").prop('disabled', false); $(\"#inputQueryString_inject\").prop('disabled', false); }});</script>";
+
+			$injectHTML .= "<script type=\"text/javascript\">$(\"#inject\").submit(function(event) {  event.preventDefault(); injectDoc();}); ";
+			$injectHTML .= "
+				$(\"#inputTypeSelect_inject\").change(function() { 
+					var index = $(\"#inputIndexSelect_inject\").val();
+					var type = $(this).val();
+					var selectedElement = index + \"_\" + type + \"_fields\";
+					
+					$(\"#\"+$(\"#current_inputIndexSelect_inject\").val()).hide(\"fast\");
+					$(\"#current_inputIndexSelect_inject\").val(selectedElement);
+					$(\"#\"+selectedElement).show(\"fast\");
+					
+				});</script>
+			";
 			
 			return "<div id=\"injectHTML\">$injectHTML</div>";
 		}else{

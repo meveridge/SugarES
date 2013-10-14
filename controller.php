@@ -92,7 +92,27 @@ if($_POST['action']=="serverConnection"){
 	$errorHTML = $ESServer->populateErrorHTML();
 	echo"<div id=\"errorContent\">$errorHTML</div>";
 	
+}else if($_POST['action']=="injectDoc"){
 	
+	require_once("ESCall.php");
+	
+	$inputServerName = $_POST['inputServerName'];
+	$inputPort = $_POST['inputPort'];
+	$inputIndexSelect = $_POST['inputIndexSelect'];
+	$inputTypeSelect = $_POST['inputTypeSelect'];
+	
+	$inputIdQuery = $_POST['inputIdQuery'];
+	$inputQueryString = $_POST['inputQueryString'];
+	
+	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndexSelect);
+	//$docResultsHTML = $ESServer->injectDoc($inputTypeSelect,$inputIdQuery,$inputQueryString);
+	
+	echo"<div id=\"docResultsContent\">$docResultsHTML</div>";
+	
+	//populate any error message we have generated 
+	//during the process of making calls
+	$errorHTML = $ESServer->populateErrorHTML();
+	echo"<div id=\"errorContent\">$errorHTML</div>";
 
 	
 }else{

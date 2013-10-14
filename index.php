@@ -503,6 +503,34 @@
 	   				$("#errorResultsContent").empty().append(errorHTML);
 				});
 			}
+
+			function injectDoc(){
+  				
+				var $formConnection = $("#serverConnection"),
+	      			inputServerName = $formConnection.find( 'input[name="inputServerName"]' ).val(),
+	      			inputPort = $formConnection.find( 'input[name="inputPort"]' ).val();
+	      		var $formSearch = $("#inject"),
+	      			inputIndexSelect = $formSearch.find( 'select[name="inputIndexSelect_search"]' ).val(),
+	      			inputTypeSelect = $formSearch.find( 'select[name="inputTypeSelect_search"]' ).val(),
+	      			
+	      			inputIdQuery = $formSearch.find( 'input[name="inputIdQuery_search"]' ).val(),
+	      			inputQueryString = $formSearch.find( 'input[name="inputQueryString_search"]' ).val(),
+	      			action = "injectDoc",
+	      			url = "controller.php";
+
+	  			//Send the data using post
+	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, inputIdQuery: inputIdQuery, inputQueryString: inputQueryString } );
+	
+	  			//Put the results in a div
+	  			posting.done(function(data) {
+	
+	  				var docResultsHTML = $(data).find('#docResultsHTML');
+	  				populateMainContent(docResultsHTML);
+	  				
+	   				var errorHTML = $(data).find('#errorHTML');
+	   				$("#errorResultsContent").empty().append(errorHTML);
+				});
+			}
 		</script>
 		
 	</body>
