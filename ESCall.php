@@ -109,20 +109,7 @@ class ESCall {
 		}else{
 			$this->queryString .= "/_search?size=$returnedCount&q=$queryString";	
 		}
-		
-		/*
-		$this->queryString .= "
-			-d'{
-				\"highlight\" : {
-	        		\"pre_tags\" : [\"&lt;tag1&gt;\", \"&lt;tag2&gt;\"],
-	        		\"post_tags\" : [\"&lt;/tag1&gt;\", \"&lt;/tag2&gt;\"],
-	        		\"fields\" : {
-	            		\"_all\" : {}
-	        		}
-	    		}
-			}'
-		";
-		*/
+
 		$docResults = $this->executeQuery();
 		
 		$totalCount = $docResults['hits']['total'];
@@ -160,8 +147,6 @@ class ESCall {
 					</td>
 				";
 				$docHTML .= "</tr>";
-				//<a href="#" class="btn btn-large btn-danger" data-toggle="popover" title="" data-content="And here's some amazing content. It's very engaging. right?" data-original-title="A Title">Click to toggle popover</a>
-				//<a href="#" data-toggle="tooltip" title="first tooltip">hover over me</a>
 			}
 			
 			$docHTML .= "</table>";
@@ -176,6 +161,43 @@ class ESCall {
 		return "<div id=\"docResultsHTML\">$docHTML</div>";
 	}
 	
+	public function injectDoc($inputType,$fieldsJSON){
+		
+		$returnedCount = 50;
+		$queryId = uniqid();
+
+		$this->queryString = $this->host . ":" . $this->port;
+		$this->queryString .= "/" . $this->indexName;
+		$this->queryString .= "/" . $inputType;
+		$this->queryString .= "/" . $queryId;
+	
+		$this->jsonQueryString = $fieldsJSON;
+		
+		$docResults = $this->executeQuery("XPUT");
+		
+		$docHTML = print_r($docResults,true);
+
+		$injectResult = $docResults['ok'];
+		$injectId = $docResults['_id'];
+		$injectType = $docResults['_type'];
+		
+		if($injectResult=="1"){
+			$this->logError("success","inject","true");
+		
+			$docHTML = "<fieldset><legend>Inject Results</legend>";
+		
+			$docHTML .= "<table class=\"table table-striped table-condensed table-bordered\">";
+			$docHTML .= "<tr><th>Type</th><th>Id</th></tr>";
+			$docHTML .= "<tr><td>{$injectType}</td><td><a href=\"#\" onClick=\"retrieveDocById('{$this->indexName}','{$injectType}','{$injectId}');\">{$injectId}</a></td>";
+			$docHTML .= "</tr>";
+			$docHTML .= "</table>";
+		}else{
+			$docHTML .= "Inject Failed";
+		}
+
+		return "<div id=\"docResultsHTML\">$docHTML</div>";
+	}
+
 	/* loadESMetadata()
 	 * Queries the Server to retrieve the indexes, the version of the index,
 	 * and the Mappings of the index.
@@ -183,7 +205,6 @@ class ESCall {
 	 * 
 	 */
 	public function loadESMetadata(){
-		//http://localhost:9201/_cluster/state?filter_nodes=true&filter_routing_table=true&filter_blocks=true
 		//http://localhost:9201/_cluster/state?filter_nodes=true&filter_routing_table=true&filter_blocks=true
 		
 		$this->queryString = $this->host . ":" . $this->port;
@@ -365,6 +386,7 @@ class ESCall {
 			$injectHTML .= "<input type='hidden' id='current_inputIndexSelect_inject' /><select class=\"span8\" name=\"inputIndexSelect_inject\" id=\"inputIndexSelect_inject\">";
 			
 			$moduleOptions = "";
+			$fieldHTML = "";
 			$typesAccrossAllIndexes = array();
 			$fieldsPerModule = array();
 			foreach($this->ESMetadata['indexes'] as $indexName => $metadata){
@@ -383,7 +405,7 @@ Array
 						*/
 						$fieldHTML .= "<div class=\"row-fluid\">";
 						$fieldHTML .= "<label class=\"span4\" for=\"inputField{$fieldName}_inject\">$fieldName</label>";
-						$fieldHTML .= "<input class=\"span8\" type=\"text\" id=\"inputField{$fieldName}_inject\" name=\"inputField{$fieldName}_inject\" ".($fieldName=="module"?"disabled='true' value='$moduleName' ":"")."/>";	
+						$fieldHTML .= "<input class=\"span8\" type=\"text\" id=\"inputField{$fieldName}_inject\" name=\"{$fieldName}\" ".($fieldName=="module"?"disabled='true' value='$moduleName' ":"")."/>";	
 						$fieldHTML .= "</div>";
 					}
 					$fieldHTML .= "</div>";
@@ -410,7 +432,6 @@ Array
 			$injectHTML .= "<i class=\"icon-search icon-white\"></i>Inject Data";
 			$injectHTML .= "</button></div></form>";
 			
-
 			$injectHTML .= "<script type=\"text/javascript\">$(\"#inject\").submit(function(event) {  event.preventDefault(); injectDoc();}); ";
 			$injectHTML .= "
 				$(\"#inputTypeSelect_inject\").change(function() { 
@@ -422,7 +443,12 @@ Array
 					$(\"#current_inputIndexSelect_inject\").val(selectedElement);
 					$(\"#\"+selectedElement).show(\"fast\");
 					
-				});</script>
+				});
+				$(\"#inputIndexSelect_inject\").change(function() { 
+					$(\"#inputTypeSelect_inject\").val(\"\");
+					changeActiveIndex($(this).val());
+				});
+				</script>
 			";
 			
 			return "<div id=\"injectHTML\">$injectHTML</div>";
@@ -562,7 +588,7 @@ Array
 			//curl_setopt($ch, CURLOPT_POSTFIELDS, $this->jsonQueryString);	
 		}elseif($method=="XPUT"){
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-			//curl_setopt($ch, CURLOPT_POSTFIELDS, $this->jsonQueryString);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $this->jsonQueryString);
 		}
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		
@@ -581,6 +607,7 @@ Array
 		if(count($result_array)>0){
 			if(isset($result_array['exists']) && $result_array['exists']==false){
 				$this->logError("error","es_error","Elasticsearch did not return a proper dataset.");
+				$this->logError("info","curl_results",$results);
 			}
 		}else{
 			$this->logError("error","es_error","Elasticsearch did not return a proper dataset.");

@@ -101,11 +101,10 @@ if($_POST['action']=="serverConnection"){
 	$inputIndexSelect = $_POST['inputIndexSelect'];
 	$inputTypeSelect = $_POST['inputTypeSelect'];
 	
-	$inputIdQuery = $_POST['inputIdQuery'];
-	$inputQueryString = $_POST['inputQueryString'];
+	$fieldsJSON = "{" . trim($_POST['fieldsJSON'],",") . "}";
 	
 	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndexSelect);
-	//$docResultsHTML = $ESServer->injectDoc($inputTypeSelect,$inputIdQuery,$inputQueryString);
+	$docResultsHTML = $ESServer->injectDoc($inputTypeSelect,$fieldsJSON);
 	
 	echo"<div id=\"docResultsContent\">$docResultsHTML</div>";
 	
