@@ -107,6 +107,7 @@ class ESCall {
 		if($queryId != ""){
 			$this->queryString .= "/" . $queryId;
 		}else{
+			$queryString = urlencode($queryString);
 			$this->queryString .= "/_search?size=$returnedCount&q=$queryString";	
 		}
 
