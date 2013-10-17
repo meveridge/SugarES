@@ -208,6 +208,13 @@
     				</ul>
     			</p>
     			<p><a href="https://github.com/meveridge/SugarES">https://github.com/meveridge/SugarES</a></p>
+    			<p>
+    				Third party packages used: <br />
+    				<ul>
+    					<li><a href="http://jquery.com/">jQuery</a> -- jQuery is a fast and concise JavaScript Library that simplifies HTML document traversing, event handling, animating, and Ajax interactions for rapid web development.</li>
+    					<li><a href="http://getbootstrap.com/">Twitterbootstrap</a> -- HTML, CSS, and JS toolkit from Twitter.</li>
+    				</ul>
+    			</p>
   			</div>
   			<div class="modal-footer">
     			<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -530,7 +537,6 @@
 	      			alert("Please select a Document Type.");
 	      		}else{
 
-
 		  			//Send the data using post
 		  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, fieldsJSON: fieldsJSON } );
 		
@@ -543,10 +549,8 @@
 		   				var errorHTML = $(data).find('#errorHTML');
 		   				$("#errorResultsContent").empty().append(errorHTML);
 					});
-
 	  			}
 			}
 		</script>
-		
 	</body>
 </html>
