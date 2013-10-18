@@ -20,7 +20,7 @@ Shows the current hierarchy of the index. Expand out to see which modules have b
 
 INJECT
 =======
-Allows you to create a new record in the FTS server. 
+Allows you to create a new record in the FTS server. Select a module and populate the fields to inject into that module’s FTS data. Populate the ID field with the record ID in Sugar. This will ensure when the results pull up in Sugar, the ID matches and the links can be made properly. If the ID is left blank a random id will be generated.
 
 SEARCH
 =======
