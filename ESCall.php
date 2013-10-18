@@ -162,10 +162,14 @@ class ESCall {
 		return "<div id=\"docResultsHTML\">$docHTML</div>";
 	}
 	
-	public function injectDoc($inputType,$fieldsJSON){
+	public function injectDoc($inputType,$inputID,$fieldsJSON){
 		
 		$returnedCount = 50;
-		$queryId = uniqid();
+		if($inputID==""){
+			$queryId = uniqid();
+		}else{
+			$queryId = $inputID;
+		}
 
 		$this->queryString = $this->host . ":" . $this->port;
 		$this->queryString .= "/" . $this->indexName;
@@ -425,6 +429,10 @@ Array
 			$injectHTML .= "<select class=\"span8\" name=\"inputTypeSelect_inject\" id=\"inputTypeSelect_inject\"><option value=\"\"></option>";
 			$injectHTML .= $moduleOptions;
 			$injectHTML .= "</select></div>";
+
+			$injectHTML .= "<div class=\"row-fluid\"><label class=\"span4\" for=\"inputFieldID_inject\">ID</label>";
+			$injectHTML .= "<input class=\"span8\" type=\"text\" id=\"inputFieldID_inject\" name=\"inputFieldID_inject\" placeholder=\"(Optional)\" />";
+			$injectHTML .= "</div>";
 
 			$injectHTML .= $fieldHTML;
 			

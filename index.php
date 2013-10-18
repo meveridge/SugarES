@@ -519,6 +519,7 @@
 	      		var $formSearch = $("#inject"),
 	      			inputIndexSelect = $formSearch.find( 'select[name="inputIndexSelect_inject"]' ).val(),
 	      			inputTypeSelect = $formSearch.find( 'select[name="inputTypeSelect_inject"]' ).val(),
+	      			inputID = $formSearch.find( 'input[name="inputFieldID_inject"]' ).val(),
 	      			action = "injectDoc",
 	      			url = "controller.php";
 
@@ -537,8 +538,10 @@
 	      			alert("Please select a Document Type.");
 	      		}else{
 
+	      			$formSearch.find( 'input[name="inputFieldID_inject"]' ).val("");
+
 		  			//Send the data using post
-		  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, fieldsJSON: fieldsJSON } );
+		  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, inputID: inputID, fieldsJSON: fieldsJSON } );
 		
 		  			//Put the results in a div
 		  			posting.done(function(data) {
