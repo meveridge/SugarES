@@ -89,6 +89,7 @@ class ESCall {
 		$docHTML .= "</table><div class=\"row-fluid\"><dl class=\"dl-horizontal\">";
 		
 		foreach($docResults['_source'] as $fieldName => $fieldValue){
+			if(!isset($fieldValue)||$fieldValue=="") $fieldValue = "&nbsp;";
 			$docHTML .= "<dt>$fieldName:</dt><dd>$fieldValue</dd>";
 		}
 		

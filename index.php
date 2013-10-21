@@ -531,7 +531,7 @@
 
 	      		varFields.each(function( index ) {
 	      			fieldsJSON = fieldsJSON + "\""+$(this).attr("name")+"\": \""+$(this).val()+"\",";
-	      			$(this).val("");
+	      			if($(this).attr("name")!="module") $(this).val("");
 	      		});
 
 	      		if(inputTypeSelect==""){
