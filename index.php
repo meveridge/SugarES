@@ -511,6 +511,11 @@
 				});
 			}
 
+			function retrieveMoreDocsByType(type){
+				$("#search").find( 'select[name="inputTypeSelect_search"]' ).val(type);
+				retrieveDocsByQuery();
+			}
+
 			function injectDoc(){
   				
 				var $formConnection = $("#serverConnection"),

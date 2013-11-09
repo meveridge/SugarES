@@ -37,7 +37,7 @@ class ESCall {
 	
 	public function getDocsByIndexAndType($inputType){
 		
-		$returnedCount = 50;
+		$returnedCount = 10;
 		
 		$this->queryString = $this->host . ":" . $this->port;
 		$this->queryString .= "/" . $this->indexName;
@@ -51,6 +51,7 @@ class ESCall {
 		
 		if($totalCount < $returnedCount) $returnedCount = $totalCount;
 		$this->logError("success","record_count","Returned $returnedCount of $totalCount records.");
+		if($totalCount > $returnedCount) $docResults['hits']['hits'][] = array("_id" => "more...");
 		
 		$docTreeHTML = "<ul id=\"{$this->indexName}_{$inputType}_docs\" class=\"treeAction\">";
 		foreach($docResults['hits']['hits'] as $key => $value){
@@ -60,7 +61,11 @@ class ESCall {
 			}else{
 				$docIdDisplay = $docId;
 			}
-			$docTreeHTML .= "<li id=\"{$this->indexName}_{$inputType}_tree_{$docId}\" class=\"treeAction\" onClick=\"retrieveDocById('{$this->indexName}','{$inputType}','{$docId}');\">$docIdDisplay<i id=\"{$this->indexName}_{$inputType}_tree_{$docId}_icon\" class=\"pull-right\"></i></li>";
+			if($docIdDisplay == "more..."){
+				$docTreeHTML .= "<li id=\"{$this->indexName}_{$inputType}_tree_{$docId}\" class=\"treeAction\" onClick=\"retrieveMoreDocsByType('{$inputType}');\">$docIdDisplay<i id=\"{$this->indexName}_{$inputType}_tree_{$docId}_icon\" class=\"pull-right\"></i></li>";
+			}else{
+				$docTreeHTML .= "<li id=\"{$this->indexName}_{$inputType}_tree_{$docId}\" class=\"treeAction\" onClick=\"retrieveDocById('{$this->indexName}','{$inputType}','{$docId}');\">$docIdDisplay<i id=\"{$this->indexName}_{$inputType}_tree_{$docId}_icon\" class=\"pull-right\"></i></li>";
+			}
 		}
 		$docTreeHTML .= "</ul>";
 		return "<div id=\"docTreeHTML\">$docTreeHTML</div>";
@@ -107,9 +112,11 @@ class ESCall {
 		$this->queryString .= "/" . $inputType;
 		if($queryId != ""){
 			$this->queryString .= "/" . $queryId;
+		}elseif($queryString == ""){
+			$this->queryString .= "/_search?size=$returnedCount";
 		}else{
 			$queryString = urlencode($queryString);
-			$this->queryString .= "/_search?size=$returnedCount&q=$queryString";	
+			$this->queryString .= "/_search?size=$returnedCount&q=$queryString";
 		}
 
 		$docResults = $this->executeQuery();
