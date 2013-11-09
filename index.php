@@ -64,6 +64,14 @@
 	</head>
 	<body>
 		
+<?php 
+
+	$inputServerName = ( isset($_GET["inputServerName"]) ? $_GET["inputServerName"] :  "localhost" );
+	$inputPort = ( isset($_GET["inputPort"]) ? $_GET["inputPort"] : "9200" );
+	$inputIndex = ( isset($_GET["inputIndex"]) ? $_GET["inputIndex"] : "" );
+
+?>
+
 		<input type="hidden" id="activeDocRecordIndex" />
 		<input type="hidden" id="activeDocRecordType" />
 		<input type="hidden" id="activeDocRecordId" />
@@ -100,17 +108,17 @@
 					<form action='index.php' class="form-inline" id="serverConnection">
 						<div class="row-fluid">
 							<label class="span4" for="inputServerName">Server</label>
-  							<input class="span8" type="text" id="inputServerName" name="inputServerName" value="localhost" tabindex="1" />
+  							<input class="span8" type="text" id="inputServerName" name="inputServerName" value="<?php echo $inputServerName; ?>" tabindex="1" />
 						</div>
 						
 						<div class="row-fluid">
 							<label class="span4" for="inputPort">Port</label>
-  							<input class="span8" type="text" id="inputPort" name="inputPort" value="9200" tabindex="2" />
+  							<input class="span8" type="text" id="inputPort" name="inputPort" value="<?php echo $inputPort; ?>" tabindex="2" />
 						</div>
 						
 						<div class="row-fluid">
 							<label class="span4" for="inputIndex">Index</label>
-  							<input class="span8" type="text" id="inputIndex" name="inputIndex" placeholder="(optional)" />
+  							<input class="span8" type="text" id="inputIndex" name="inputIndex" placeholder="(optional)" value = "<?php echo $inputIndex; ?>" />
 						</div>
 						
 						<div class="row-fluid">
