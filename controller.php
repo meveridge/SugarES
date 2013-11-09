@@ -1,5 +1,8 @@
 <?php
 
+$searchResultCount = $_POST["searchResultCount"];
+$treeResultCount = $_POST["treeResultCount"];
+
 if($_POST['action']=="serverConnection"){
 	require_once("ESCall.php");
 	
@@ -41,7 +44,7 @@ if($_POST['action']=="serverConnection"){
 	$inputIndex = $_POST['inputIndex'];
 	$inputType = $_POST['inputType'];
 	
-	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndex);
+	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndex,$searchResultCount,$treeResultCount);
 	$docTreeHTML = $ESServer->getDocsByIndexAndType($inputType);
 	
 	echo"<div id=\"docTreeContent\">$docTreeHTML</div>";
@@ -82,7 +85,7 @@ if($_POST['action']=="serverConnection"){
 	$inputIdQuery = $_POST['inputIdQuery'];
 	$inputQueryString = $_POST['inputQueryString'];
 	
-	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndexSelect);
+	$ESServer = new ESCall($inputServerName,$inputPort,$inputIndexSelect,$searchResultCount,$treeResultCount);
 	$docResultsHTML = $ESServer->getDocsByQuery($inputTypeSelect,$inputIdQuery,$inputQueryString);
 	
 	echo"<div id=\"docResultsContent\">$docResultsHTML</div>";

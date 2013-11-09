@@ -12,13 +12,16 @@ class ESCall {
 	var $fieldArray = array();
 	
 	var $errorArray = array();
-	
 	var $ESMetadata = array();
+
+	var $searchResultCount = "50";
+	var $treeResultCount = "10";
 	
-	
-	
-	public function __construct($hostOverride="",$portOverride="",$indexOverride=""){
-		//echo"execute __construct<br>";
+	public function __construct($hostOverride="",$portOverride="",$indexOverride="",$searchResultCount="",$treeResultCount=""){
+
+		if($searchResultCount != "") $this->searchResultCount = $searchResultCount;
+		if($treeResultCount != "") $this->treeResultCount = $treeResultCount;
+
 		if($hostOverride != "") $this->host = $hostOverride;
 		if($portOverride != "") $this->port = $portOverride;
 		if($indexOverride != "") $this->indexName = $indexOverride;
@@ -37,7 +40,7 @@ class ESCall {
 	
 	public function getDocsByIndexAndType($inputType){
 		
-		$returnedCount = 10;
+		$returnedCount = $this->treeResultCount;
 		
 		$this->queryString = $this->host . ":" . $this->port;
 		$this->queryString .= "/" . $this->indexName;
@@ -105,7 +108,7 @@ class ESCall {
 	
 	public function getDocsByQuery($inputType,$queryId,$queryString){
 		
-		$returnedCount = 50;
+		$returnedCount = $this->searchResultCount;
 		
 		$this->queryString = $this->host . ":" . $this->port;
 		$this->queryString .= "/" . $this->indexName;
@@ -172,7 +175,6 @@ class ESCall {
 	
 	public function injectDoc($inputType,$inputID,$fieldsJSON){
 		
-		$returnedCount = 50;
 		if($inputID==""){
 			$queryId = uniqid();
 		}else{
@@ -253,7 +255,6 @@ class ESCall {
 	public function loadServerStats(){
 		
 		$this->queryString = $this->host . ":" . $this->port;
-		//if($this->indexName != "") $this->queryString .= "/" . $this->indexName;
 		$indexOverride = $this->indexName;
 		$this->queryString .= "/_stats?indexing=false&get=false&search=false";
 		

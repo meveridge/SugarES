@@ -65,10 +65,27 @@
 	<body>
 		
 <?php 
+	
+	$filterMap = array(
+    	'inputServerName'   => FILTER_SANITIZE_ENCODED,
+    	'inputPort'   => FILTER_SANITIZE_ENCODED,
+    	'inputIndex'   => FILTER_SANITIZE_ENCODED,
+    	'searchResultCount' => FILTER_VALIDATE_INT,
+    	'treeResultCount' => FILTER_VALIDATE_INT,
+	);
 
-	$inputServerName = ( isset($_GET["inputServerName"]) ? $_GET["inputServerName"] :  "localhost" );
-	$inputPort = ( isset($_GET["inputPort"]) ? $_GET["inputPort"] : "9200" );
-	$inputIndex = ( isset($_GET["inputIndex"]) ? $_GET["inputIndex"] : "" );
+	$getInputs = filter_input_array(INPUT_GET, $filterMap);
+
+	//Connection Form
+	$inputServerName = ( isset($getInputs["inputServerName"]) ? $getInputs["inputServerName"] :  "localhost" );
+	$inputPort = ( isset($getInputs["inputPort"]) ? $getInputs["inputPort"] : "9200" );
+	$inputIndex = ( isset($getInputs["inputIndex"]) ? $getInputs["inputIndex"] : "" );
+
+	//Settings
+	$searchResultCount = ( isset($getInputs["searchResultCount"]) ? $getInputs["searchResultCount"] : "50" );
+	$treeResultCount = ( isset($getInputs["treeResultCount"]) ? $getInputs["treeResultCount"] : "10" );
+
+	$settingsPassThroughAJAX = "searchResultCount: $searchResultCount,treeResultCount: $treeResultCount";
 
 ?>
 
@@ -286,7 +303,13 @@
       				url = "controller.php";
 
   				/* Send the data using post */
-  				var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex } );
+  				var posting = $.post( url, { 
+  					action: action, 
+  					inputServerName: inputServerName, 
+  					inputPort: inputPort, 
+  					inputIndex: inputIndex,
+  					<?php echo $settingsPassThroughAJAX; ?>
+  				} );
 
   				/* Put the results in a div */
   				posting.done(function( data ) {
@@ -416,7 +439,14 @@
 	      				url = "controller.php";
 	
 	  				//Send the data using post
-	  				var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex, inputType: inputType } );
+	  				var posting = $.post( url, { 
+	  					action: action, 
+	  					inputServerName: inputServerName, 
+	  					inputPort: inputPort, 
+	  					inputIndex: inputIndex, 
+	  					inputType: inputType,
+	  					<?php echo $settingsPassThroughAJAX; ?>
+	  				} );
 	
 	  				//Put the results in a div
 	  				posting.done(function(data) {
@@ -479,7 +509,15 @@
 				highlightSelectedRecord(inputIndex,inputType,inputId,true);
 				
 	  			//Send the data using post
-	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndex: inputIndex, inputType: inputType, inputId: inputId } );
+	  			var posting = $.post( url, { 
+	  				action: action, 
+	  				inputServerName: inputServerName, 
+	  				inputPort: inputPort, 
+	  				inputIndex: inputIndex, 
+	  				inputType: inputType, 
+	  				inputId: inputId,
+	  				<?php echo $settingsPassThroughAJAX; ?>
+	  			} );
 	
 	  			//Put the results in a div
 	  			posting.done(function(data) {
@@ -506,7 +544,16 @@
 	      			url = "controller.php";
 
 	  			//Send the data using post
-	  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, inputIdQuery: inputIdQuery, inputQueryString: inputQueryString } );
+	  			var posting = $.post( url, { 
+	  				action: action, 
+	  				inputServerName: inputServerName, 
+	  				inputPort: inputPort, 
+	  				inputIndexSelect: inputIndexSelect, 
+	  				inputTypeSelect: inputTypeSelect, 
+	  				inputIdQuery: inputIdQuery, 
+	  				inputQueryString: inputQueryString,
+	  				<?php echo $settingsPassThroughAJAX; ?> 
+	  			} );
 	
 	  			//Put the results in a div
 	  			posting.done(function(data) {
@@ -554,7 +601,16 @@
 	      			$formSearch.find( 'input[name="inputFieldID_inject"]' ).val("");
 
 		  			//Send the data using post
-		  			var posting = $.post( url, { action: action, inputServerName: inputServerName, inputPort: inputPort, inputIndexSelect: inputIndexSelect, inputTypeSelect: inputTypeSelect, inputID: inputID, fieldsJSON: fieldsJSON } );
+		  			var posting = $.post( url, { 
+		  				action: action, 
+		  				inputServerName: inputServerName, 
+		  				inputPort: inputPort, 
+		  				inputIndexSelect: inputIndexSelect, 
+		  				inputTypeSelect: inputTypeSelect, 
+		  				inputID: inputID, 
+		  				fieldsJSON: fieldsJSON,
+		  				<?php echo $settingsPassThroughAJAX; ?>
+		  			} );
 		
 		  			//Put the results in a div
 		  			posting.done(function(data) {
