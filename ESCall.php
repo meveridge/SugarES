@@ -10,6 +10,7 @@ class ESCall {
 	var $queryString = "";
 	var $jsonQueryString = "";
 	var $fieldArray = array();
+	var $connected = false;
 	
 	var $errorArray = array();
 	var $ESMetadata = array();
@@ -25,17 +26,32 @@ class ESCall {
 		if($hostOverride != "") $this->host = $hostOverride;
 		if($portOverride != "") $this->port = $portOverride;
 		if($indexOverride != "") $this->indexName = $indexOverride;
-		$this->logError("success","information","Connecting to: {$hostOverride}:{$portOverride}/{$indexOverride}");
+
+		//Check if we have a connection
+		$this->queryString = $this->host . ":" . $this->port;
+		
+		$connection = $this->executeQuery();
+
+		if(is_array($connection) && $connection['ok']=="true"){
+			$this->logError("success","information","Connecting to: {$hostOverride}:{$portOverride}/{$indexOverride}");
+			$this->queryString = "";
+			$this->connected = true;
+		}else{
+			$this->logError("error","Error","Failed to connect to: {$hostOverride}:{$portOverride}/");
+			return false;
+		}
 		
 	}
 	
 	public function connect(){
-			
-		//load es metadata
-		$this->loadESMetadata();
 		
-		//load server data (stats)
-		$this->loadServerStats();
+		if($this->connected){
+			//load es metadata
+			$this->loadESMetadata();
+		
+			//load server data (stats)
+			$this->loadServerStats();
+		}
 	}
 	
 	public function getDocsByIndexAndType($inputType){
@@ -447,7 +463,7 @@ Array
 			
 			$injectHTML .= "<div class=\"form-actions\">";
 			$injectHTML .= "<button id=\"injectSubmit\" type=\"submit\" class=\"btn btn-primary pull-right\">";
-			$injectHTML .= "<i class=\"icon-search icon-white\"></i>Inject Data";
+			$injectHTML .= "<i class=\"icon-plus icon-white\"></i>Inject Data";
 			$injectHTML .= "</button></div></form>";
 			
 			$injectHTML .= "<script type=\"text/javascript\">$(\"#inject\").submit(function(event) {  event.preventDefault(); injectDoc();}); ";
