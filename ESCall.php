@@ -32,7 +32,7 @@ class ESCall {
 		
 		$connection = $this->executeQuery();
 
-		if(is_array($connection) && $connection['ok']=="true"){
+		if(is_array($connection) && isset($connection['status']) && $connection['status']=="200"){
 			$this->logError("success","information","Connecting to: {$hostOverride}:{$portOverride}/{$indexOverride}");
 			$this->queryString = "";
 			$this->connected = true;
