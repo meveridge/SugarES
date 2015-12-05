@@ -278,9 +278,11 @@ class ESCall {
 		
 		if(count($serverStats)>0){
 			
-			//populate server data
-			$this->ESMetadata['total_docs'] = $serverStats['_all']['total']['docs']['count'];
-			$this->ESMetadata['deleted_docs'] = $serverStats['_all']['total']['docs']['deleted'];
+			if(isset($serverStats['_all']['total']['docs'])){
+				//populate server data
+				$this->ESMetadata['total_docs'] = $serverStats['_all']['total']['docs']['count'];
+				$this->ESMetadata['deleted_docs'] = $serverStats['_all']['total']['docs']['deleted'];
+			}
 			
 			$this->ESMetadata['store_size'] = $serverStats['_all']['total']['store']['size'];
 			
@@ -290,8 +292,10 @@ class ESCall {
 				foreach($indices as $indexName => $indexStats){
 					if($indexOverride != "" && $indexOverride != $indexName) continue;
 					
-					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
-					$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+					if(isset($indexStats['total']['docs'])){
+						$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
+						$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+					}
 					
 					$this->ESMetadata['indexes'][$indexName]['index_store_size'] = $indexStats['total']['store']['size'];
 					
@@ -301,8 +305,10 @@ class ESCall {
 				foreach($indices as $indexName => $indexStats){
 					if($indexOverride != "" && $indexOverride != $indexName) continue;
 					
-					$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
-					$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+					if(isset($indexStats['total']['docs'])){
+						$this->ESMetadata['indexes'][$indexName]['index_total_docs'] = $indexStats['total']['docs']['count'];
+						$this->ESMetadata['indexes'][$indexName]['index_deleted_docs'] = $indexStats['total']['docs']['deleted'];
+					}
 					
 					$this->ESMetadata['indexes'][$indexName]['index_store_size'] = $indexStats['total']['store']['size'];
 					
