@@ -4,6 +4,7 @@ class ESCall {
 	
 	var $host = "localhost";
 	var $port = "9200";
+	var $serverVersion = "";
 	
 	var $indexName = "";
 	var $type = "";
@@ -36,6 +37,7 @@ class ESCall {
 			$this->logError("success","information","Connecting to: {$hostOverride}:{$portOverride}/{$indexOverride}");
 			$this->queryString = "";
 			$this->connected = true;
+			$this->serverVersion = $connection['version']['number'];
 		}else{
 			$this->logError("error","Error","Failed to connect to: {$hostOverride}:{$portOverride}/");
 			return false;
@@ -142,7 +144,7 @@ class ESCall {
 		
 		$totalCount = $docResults['hits']['total'];
 		
-		if($totalCount == "" && $docResults['exists'] == "true"){
+		if($totalCount == "" && ($docResults['found'] == "true" || $docResults['exists'] == "true")){
 			//means we searched on an id, not a query... or there was an error.
 			$totalCount = 1;
 			$resultArray = array($docResults);
@@ -253,7 +255,7 @@ class ESCall {
 			if($indexOverride != "" && $indexOverride != $key) continue;
 			$this->ESMetadata['indexes'][$key] = array(
 				"state" => $value['state'],
-				"version" => "0.".$value['settings']['index.version.created'],
+				"version" => (isset($value['settings']['index.version.created']) ? "0." . $value['settings']['index.version.created'] : $this->serverVersion),
 			);
 			
 			ksort($value['mappings']);
@@ -384,7 +386,7 @@ class ESCall {
 			}
 
 			$searchHTML .= "</select></div><div class=\"row-fluid\"><label class=\"span4\" for=\"inputTypeSelect_search\">Type</label>";
-			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect_search\" id=\"inputTypeSelect_search\"><option value=\"*\">Any</option>";
+			$searchHTML .= "<select class=\"span8\" name=\"inputTypeSelect_search\" id=\"inputTypeSelect_search\">";
 			$searchHTML .= $moduleOptions;
 			$searchHTML .= "</select></div><div class=\"row-fluid\">";
 			
@@ -396,6 +398,10 @@ class ESCall {
 			$searchHTML .= "<label class=\"span4\" for=\"inputQueryString_search\">Query</label>";
 			$searchHTML .= "<input class=\"span8\" type=\"text\" id=\"inputQueryString_search\" name=\"inputQueryString_search\" placeholder=\"Enter Query String...\" />";
 			
+			$searchHTML .= "</div><div class=\"row-fluid\">";
+
+			$searchHTML .= "<p class=\"span12\"><i>In Sugar 7.7+ the _all field is removed from ES Indexes. You must specify the field name before the query.<br /> ( E.g. name:\"Calm Sailing Inc\" )</i></p>";
+
 			$searchHTML .= "</div><div class=\"row-fluid\">";
 			
 			$searchHTML .= "<div class=\"form-actions\">";
