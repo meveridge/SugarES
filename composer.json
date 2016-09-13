@@ -1,0 +1,43 @@
+{
+  "name": "meveridge/sugares",
+  "description": "An RESTful PHP Client for working with Elastic Search, in regards to a SugarCRM installation",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Mark Everidge",
+      "email": "meveridge@sugarcrm.com",
+      "role": "Developer"
+    },
+    {
+      "name": "Mike Russell",
+      "email": "mrussell@sugarcrm.com",
+      "role": "Developer"
+    }
+  ],
+  "keywords": [
+    "sugarcrm",
+    "sugar",
+    "crm",
+    "rest",
+    "elasticsearch",
+    "elastic",
+    "api"
+  ],
+  "require": {
+    "php": ">=5.3.0",
+    "sugarcrm/rest-php-client": "1.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.0|~5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sugar\\ElasticSearch\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sugar\\ElasticSearch\\Tests\\": "tests/"
+    }
+  }
+}

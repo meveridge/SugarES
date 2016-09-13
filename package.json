@@ -1,0 +1,24 @@
+{
+  "private": false,
+  "name": "sugares",
+  "version": "1.0",
+  "description": "An RESTful PHP Client for working with Elastic Search, in regards to a SugarCRM installation",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "phpunit || true",
+    "coverage": "phpunit --coverage-html=coverage || true",
+    "doc": "phpdoc -d ./src -t ./doc/ || true",
+    "quality": "phpcs --standard=./ruleset.xml src/ || true",
+    "all": "npm run coverage && npm run doc && npm run quality"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meveridge/sugares"
+  },
+  "bugs": {
+    "url": "https://github.com/meveridge/sugares/issues"
+  },
+  "homepage": "https://github.com/meveridge/sugares"
+}
