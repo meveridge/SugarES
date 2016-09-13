@@ -45,7 +45,9 @@ class AbstractESClient extends AbstractClient {
 
     public function __call($name, $params) {
         $EndPoint = parent::__call($name, $params);
-        $EndPoint->setVersion($this->version);
+        if (!empty($this->version)) {
+            $EndPoint->setVersion($this->version);
+        }
     }
 
     public function connect(){
